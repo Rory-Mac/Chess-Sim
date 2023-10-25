@@ -82,6 +82,20 @@ void RemoveLinkedListNode(struct LinkedList *list, int nodeIndex) {
     free(curr);
 }
 
+void ReverseLinkedList(struct LinkedList *list) {
+    struct LinkedListNode *prev = NULL;
+    struct LinkedListNode *curr = list->head;
+    struct LinkedListNode *next = list->head;
+    list->tail = list->head;
+    while (next != NULL) {
+        next = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next;
+    }
+    list->head = prev;
+}
+
 void PrintLinkedList(struct LinkedList *list, int nodeIndex) {
     struct LinkedListNode *curr = list->head;
     if (list->size == 0) {
@@ -111,6 +125,7 @@ int main(int argc, char *argv[]) {
         if (strcmp(command, "help\0") == 0) {
             printf("\tadd [value] [index] : add node to linked list\n");
             printf("\tremove [index] : remove node from linked list\n");
+            printf("\treverse : reverse linked list\n");
             printf("\tprint : print linked list\n");
         } else if (strcmp(command, "add\0") == 0) {
             scanf("%d %d", &nodeValue, &nodeIndex);
@@ -120,6 +135,8 @@ int main(int argc, char *argv[]) {
             RemoveLinkedListNode(list, nodeIndex);
         } else if (strcmp(command, "print\0") == 0) {
             PrintLinkedList(list, nodeIndex);
+        } else if (strcmp(command, "reverse\0") == 0) {
+            ReverseLinkedList(list);
         } else if (strcmp(command, "exit\0") == 0) {
             break;
         } else {
