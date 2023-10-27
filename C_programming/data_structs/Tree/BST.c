@@ -16,7 +16,7 @@ struct BST *CreateBST() {
     newTree->right = NULL;
 }
 
-int InsertBSTNode(struct BST *tree, int value) {
+int InsertionTraversal(struct BST *tree, int value) {
     struct BST *curr = tree;
     if (tree->value > value) {
         if (tree->left == NULL) {
@@ -25,7 +25,7 @@ int InsertBSTNode(struct BST *tree, int value) {
             tree->left = newTree;
             return 0;
         }
-        return InsertBSTNode(tree->left, value);
+        return InsertionTraversal(tree->left, value);
     } else if (tree->value < value) {
         if (tree->right == NULL) {
             struct BST *newTree = createBST();
@@ -33,10 +33,17 @@ int InsertBSTNode(struct BST *tree, int value) {
             tree->right = newTree;
             return 0;
         }
-        return InsertBSTNode(tree->right, value);
+        return InsertionTraversal(tree->right, value);
     }
-    printf("Error: value already exists in BST\n");
     return -1;
+}
+
+void InsertBSTNode(struct BST *tree, int value) {
+    if (InsertionTraversal(tree, value) == -1) {
+        printf("Error: value already exists in BST\n");
+        return;
+    }
+    tree->size++;
 }
 
 void RemoveBSTNode(struct BST *tree, int value) {
@@ -112,9 +119,44 @@ int isBalanced(struct BST *tree, bool *balanced) {
     return max(depth_left, depth_right) + 1;
 }
 
+InorderTraverse(struct BST *tree, int *treeValues) {
+    struct Stack *stack = createStack(tree->size);
+    struct BST *curr = tree;
+    while (curr != NULL) {
+        push(stack, curr);
+        curr = curr->left;
+    }
+    int arrayIndex = 0;
+    while (!isEmpty(stack)) {
+        struct BST *curr = (struct BST *)pop(stack);
+        treeValues[arrayIndex] = curr->value;
+        arrayIndex++;
+        curr = curr->right;
+        while (curr != NULL) {
+            push(stack, curr);
+            curr = curr->left;
+        }
+    }
+}
+
+void binarySearchInsert(struct BST *tree, int *values, int lo, int hi) {
+    if (lo == hi) {
+        InsertBSTNode(tree, values[lo]);
+        return;
+    }
+    int med = lo + (hi - lo) / 2;
+    InsertBSTNode(tree, values[med]);
+    binarySearchInsert(tree, values, lo, med - 1);
+    binarySearchInsert(tree, values, med + 1, hi);
+}
+
 int BalanceBST(struct BST *tree) {
-    int treeValues[tree->size];
-    InorderSave(tree, treeValues);
+    int size = tree->size;
+    int treeValues[size];
+    InorderTraverse(tree, treeValues);
+    free(tree);
+    tree = CreateBST(); 
+    binarySearchInsert(tree, treeValues, 0, size);
 }
 
 int main(int argc, char *argv[]) {
@@ -134,9 +176,7 @@ int main(int argc, char *argv[]) {
         printf("balance : balance BST\n");
     } else if (strcmp(command, "insert\0") == 0) {
         scanf("%d", value);
-        if (InsertBSTNode(tree, value) == 0) {
-            tree->size ++;
-        };
+        InsertBSTNode(tree, value);
     } else if (strcmp(command, "remove\0") == 0) {
         scanf("%d", value);
         if (SearchTree(tree, value)) {
@@ -164,6 +204,3 @@ int main(int argc, char *argv[]) {
         }
     }
 }
-
-
-// balance, check memory leaks
