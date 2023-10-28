@@ -28,12 +28,12 @@ void merge(int *elems, int lo, int mid, int hi) {
         k++;
     }
     while (i < l1) {
-        elems[k] = A[i]; 
+        elems[k] = A[i];
         i++;
         k++;
     }
     while (j < l2) {
-        elems[k] = B[j]; 
+        elems[k] = B[j];
         j++;
         k++;
     }
