@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <Stack.h>
+#include "Stack.h"
 
 void push(struct Stack *stack, int value) {
     if (stack->top == stack->size - 1) {
@@ -38,7 +38,7 @@ struct Stack *createStack(int size) {
     stack->stackValues = malloc(size * sizeof(int));
 }
 
-int main(int argc, char *argv[]) {
+int stackInterface(int argc, char *argv[]) {
     struct Stack *stack = createStack(8);
     char command[255];
     int value;

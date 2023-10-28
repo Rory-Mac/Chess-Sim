@@ -1,13 +1,8 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include "Stack.h"
-
-struct BST {
-    int value;
-    int size;
-    struct BST *left;
-    struct BST *right;
-};
+#include <stdlib.h>
+#include "BST.h"
+#include "BSTStack.h"
 
 struct BST *CreateBST() {
     struct BST *newTree = malloc(sizeof(struct BST));
@@ -20,7 +15,7 @@ int InsertionTraversal(struct BST *tree, int value) {
     struct BST *curr = tree;
     if (tree->value > value) {
         if (tree->left == NULL) {
-            struct BST *newTree = createBST();
+            struct BST *newTree = CreateBST();
             newTree->value = value;
             tree->left = newTree;
             return 0;
@@ -28,7 +23,7 @@ int InsertionTraversal(struct BST *tree, int value) {
         return InsertionTraversal(tree->left, value);
     } else if (tree->value < value) {
         if (tree->right == NULL) {
-            struct BST *newTree = createBST();
+            struct BST *newTree = CreateBST();
             newTree->value = value;
             tree->right = newTree;
             return 0;
@@ -47,8 +42,8 @@ void InsertBSTNode(struct BST *tree, int value) {
 }
 
 void RemoveBSTNode(struct BST *tree, int value) {
-    if (tree == NULL) return;
-    if (tree->left == value) {
+    if (tree == NULL || tree->left == NULL && tree->right == NULL) return;
+    if (tree->left != NULL && tree->left->value == value) {
         struct BST *left_subtree = tree->left->left;
         struct BST *right_subtree = tree->left->right;
         free(tree->left);
@@ -58,7 +53,7 @@ void RemoveBSTNode(struct BST *tree, int value) {
             curr = curr->left;
         }
         curr->left = left_subtree;
-    } else if (tree->right == value) {
+    } else if (tree->right != NULL && tree->right->value == value) {
         struct BST *left_subtree = tree->right->left;
         struct BST *right_subtree = tree->right->right;
         free(tree->right);
@@ -116,10 +111,10 @@ int isBalanced(struct BST *tree, bool *balanced) {
     if (abs(depth_left - depth_right) > 1) {
         *balanced = true;
     }
-    return max(depth_left, depth_right) + 1;
+    return depth_left > depth_right ? depth_left + 1 : depth_right + 1;
 }
 
-InorderTraverse(struct BST *tree, int *treeValues) {
+void InorderTraverse(struct BST *tree, int *treeValues) {
     struct Stack *stack = createStack(tree->size);
     struct BST *curr = tree;
     while (curr != NULL) {
@@ -159,7 +154,7 @@ int BalanceBST(struct BST *tree) {
     binarySearchInsert(tree, treeValues, 0, size);
 }
 
-int main(int argc, char *argv[]) {
+int BSTinterface(int argc, char *argv[]) {
     struct BST *tree = CreateBST();
     char command[255];
     int value;
