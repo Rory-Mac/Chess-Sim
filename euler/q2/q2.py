@@ -1,10 +1,8 @@
-t0 = 0
-t1 = 1
+a = 0
+b = 1
 sum = 0
-while (t1 < 4000000):
-    temp = t0
-    t0 = t1
-    t1 += temp
-    if (t1 % 2 == 0):
-        sum += t1
+while (b < 4000000):
+    a, b = b, a + b
+    if (b % 2 == 0): 
+        sum += b
 print(sum)
