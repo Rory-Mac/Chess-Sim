@@ -146,6 +146,15 @@ void removeBST(BST *tree, int value) {
     printf("Value not found in binary search tree\n");
 }
 
+void invertBST(BSTNode *tree) {
+    if (tree == NULL) return;
+    invertBST(tree->left);
+    invertBST(tree->right);
+    BSTNode *temp = tree->left;
+    tree->left = tree->right;
+    tree->right = temp;
+}
+
 void printInorder(BSTNode *tree) {
     if (tree == NULL) return;
     printInorder(tree->left);
@@ -177,6 +186,7 @@ int main(int argc, char *argv[]) {
         if (!strcmp(command, "help\0")) {
             printf("\tinsert [value] : insert [value] into binary search tree\n");
             printf("\tremove [value] : remove [value] from binary search tree\n");
+            printf("\tinvert : invert binary search tree\n");
             printf("\tinorder : print tree elements using inorder traversal\n");
             printf("\tpreorder : print tree elements using preorder traversal\n");
             printf("\tpostorder : print tree elements using postorder traversal\n");
@@ -188,6 +198,8 @@ int main(int argc, char *argv[]) {
         } else if (!strcmp(command, "remove\0")) {
             scanf("%d", &value);
             removeBST(tree, value);
+        } else if (!strcmp(command, "invert\0")) {
+            invertBST(tree->root);
         } else if (!strcmp(command, "inorder\0")) {
             printInorder(tree->root);
             printf("\n");
