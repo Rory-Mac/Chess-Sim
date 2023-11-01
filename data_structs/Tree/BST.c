@@ -73,7 +73,77 @@ void insertBST(BST *tree, int value) {
 }
 
 void removeBST(BST *tree, int value) {
-    return;
+    BSTNode *curr = tree->root;
+    if (tree->root == NULL) {
+        printf("Value not found in binary search tree\n");
+    } else if (tree->root->value == value) {
+        BSTNode *left_subtree = curr->left;
+        BSTNode *right_subtree = curr->right;
+        free(curr);
+        if (left_subtree == NULL) {
+            tree->root = right_subtree;
+            return;
+        }
+        if (right_subtree == NULL) {
+            tree->root = left_subtree;
+            return;
+        }
+        tree->root = right_subtree;
+        curr = right_subtree;
+        while (curr->left != NULL) {
+            curr = curr->left;
+        }
+        curr->left = left_subtree;
+        return;
+    }
+    while (curr != NULL) {
+        if (value < curr->value) {
+            if (curr->left != NULL && curr->left->value == value) {
+                BSTNode *left_subtree = curr->left->left;
+                BSTNode *right_subtree = curr->left->right;
+                free(curr->left);
+                if (right_subtree == NULL) {
+                    curr->left = left_subtree;
+                    return;
+                }
+                if (left_subtree == NULL) {
+                    curr->left = right_subtree;
+                    return;
+                }
+                curr->left = right_subtree;
+                curr = right_subtree;
+                while (curr->left != NULL) {
+                    curr = curr->left;
+                }
+                curr->left = left_subtree;
+                return;
+            }
+            curr = curr->left;
+        } else if (value > curr->value) {
+            if (curr->right != NULL && curr->right->value == value) {
+                BSTNode *left_subtree = curr->right->left;
+                BSTNode *right_subtree = curr->right->right;
+                free(curr->right);
+                if (left_subtree == NULL) {
+                    curr->right = right_subtree;
+                    return;
+                }
+                if (right_subtree == NULL) {
+                    curr->right = left_subtree;
+                    return;
+                }
+                curr->right = left_subtree;
+                curr = left_subtree;
+                while (curr->right != NULL) {
+                    curr = curr->right;
+                }
+                curr->right = right_subtree;
+                return;
+            }
+            curr = curr->right;
+        }
+    }
+    printf("Value not found in binary search tree\n");
 }
 
 void printInorder(BSTNode *tree) {
