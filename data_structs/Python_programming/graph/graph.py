@@ -16,7 +16,18 @@ class Graph():
 
     # return array of values in order of a breadth first traversal
     def bfs(self, v):
-        pass
+        results = []
+        stack = []
+        visited = [False for _ in range(self.size)]
+        stack.append(v)
+        while stack:
+            v = stack.pop(0)
+            visited[v] = True
+            results.append(v)
+            for w in self.adjacency_lists[v]:
+                if not visited[w]:
+                    stack.append(w)
+        return results
 
     # return array of values in order of a depth first traversal
     def dfs(self, v):
