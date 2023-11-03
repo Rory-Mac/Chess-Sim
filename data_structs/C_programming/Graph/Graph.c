@@ -69,7 +69,7 @@ void dfs(Graph *graph, int v) {
 }
 
 int main(int argc, char *argv[]) {
-    Graph *graph = createGraph(10);
+    Graph *graph = createGraph(9);
     char command[255];
     int v, w;
     while (true) {
