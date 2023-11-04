@@ -20,15 +20,19 @@ class Store:
 
     def addItem(self, item):
         self.items.append(item)
-        self.item_indices[item] = len(self.items) - 1
+        if self.item_indices.get(item, None) == None:
+            self.item_indices[item] = [len(self.items) - 1]
+        else:
+            self.item_indices[item].append(len(self.items) - 1)
     
     def addItems(self, items):
         for item in items:
             self.addItem(item)
 
     def removeItem(self, item):
-        if self.item_indices.get(item, None) == None: return
-        item_index = self.item_indices.pop(item)
+        stored_item = self.item_indices.get(item, None)
+        if stored_item == None or stored_item == []: return
+        item_index = self.item_indices[item].pop()
         if item_index == len(self.items) - 1:
             self.items.pop()
         else:
@@ -44,8 +48,8 @@ class Store:
         return random.choice(self.items)
     
 if __name__ == "__main__":
-    mySet = Store([13,8,9,3,4,7,11,5,10,2,1,6,12])
-    mySet.removeItems([12,13,14,15])
+    mySet = Store([13,8,9,3,4,7,11,11,11,11,5,10,2,1,6,12])
+    mySet.removeItems([12,13,14,15,11,11,11,11,11])
     for _ in range(0,10):
         print(f"{mySet.getRandomItem()} ", end="")
     print()
