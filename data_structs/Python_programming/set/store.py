@@ -1,4 +1,17 @@
 import random
+#-----------------------------------------------------------------------------------------------
+# Problem Statement:
+#   create a class where data storage, retrieval and random retrieval can be done in O(1) time
+#-----------------------------------------------------------------------------------------------
+# The trick:
+#   We use an array to store values, appending new items to the end of the array.
+#   We use a dictionary to store key-value pairs mapping array values to array value indices. 
+#   This gives O(1) insertion and removal, however removal leaves gaps in our array.
+#   To avoid this, we can swap the last element of the array with the element to be removed,
+#   and update the dictionary accordingly.
+#   This keeps our array values continuous, and allows constant random retrieval by 
+#   selecting a random index from the range of the current length of the array. 
+#-----------------------------------------------------------------------------------------------
 class Store:
     def __init__(self, initial_items=[]):
         self.items = []
