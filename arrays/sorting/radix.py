@@ -1,20 +1,26 @@
-def radix_sort(nums):
-    max_num = max(nums)
-    digits = len(str(max_num))
-    str_nums = [str(num) for num in nums]
-    sorted = []
-    for i in range(1, digits):
-        counted = [0 for _ in range(len(nums))]
-        for num in str_nums:
-            if len(num) < i:
-                sorted.append(num)
+def counting_sort(items, magnitude):
+    item_counts = [0] * 10
+    results = [0] * len(items)
+    for item in items:
+        index = (item // magnitude) % 10
+        item_counts[index] += 1
+    for i in range(1, 10):
+        item_counts[i] += item_counts[i - 1]
+    for i in range(1, len(items) + 1):
+        count_index = (items[-i] // magnitude) % 10
+        results[item_counts[count_index] - 1] = items[-i]
+        item_counts[count_index] -= 1
+    for i in range(len(items)):
+        items[i] = results[i]
 
-# Expected Behaviour:
-# 170 45 75 90 802 24 2 66
-# 170 90 802 2 24 45 75 66
-# 802 2 24 45 66 170 75 90
-# 2 24 45 66 75 90 175 802
+def radix_sort(items):
+    max_item = max(items)
+    magnitude = 1
+    while max_item // magnitude > 0:
+        counting_sort(items, magnitude)
+        magnitude *= 10
+
 if __name__ == "__main__":
-    nums = [170,45,75,90,802,24,2,66]
-    result = radix_sort(nums)
-    assert result == [2,24,45,66,75,90,170,802]
+    items = [121, 432, 402, 0, 10, 564, 23, 1, 40, 45, 788, 20, 140]
+    radix_sort(items)
+    assert items == [0, 1, 10, 20, 23, 40, 45, 121, 140, 402, 432, 564, 788]
