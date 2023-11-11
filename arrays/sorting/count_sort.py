@@ -1,19 +1,19 @@
-def prefix_sum(nums):
-    for i in range(1, len(nums)):
-        nums[i] += nums[i - 1]
-        
-def count_sort(nums):
-    max_num = max(nums)
-    count = [0 for _ in range(max_num + 1)]
-    for num in nums:
-        count[num] += 1
-    prefix_sum(count)
-    result = [0 for _ in nums]
-    for i in range(1, len(nums) + 1):
-        num = nums[-i]
-        index = count[num] - 1
-        count[num] -= 1
-        result[index] = num
+def prefix_sum(items):
+    for i in range(1, len(items)):
+        items[i] += items[i - 1]
+
+def count_sort(items):
+    max_item = max(items)
+    item_count = [0 for _ in range(max_item + 1)]
+    for item in items:
+        item_count[item] += 1
+    prefix_sum(item_count)
+    result = [0 for _ in range(len(items))]
+    for i in range(1, len(items) + 1):
+        item = items[-i]
+        index = item_count[item] - 1
+        item_count[item] -= 1
+        result[index] = item
     return result
 
 if __name__ == "__main__":
