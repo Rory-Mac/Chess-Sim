@@ -1,4 +1,5 @@
 class Solution(object):
+    # with hashing
     def containsDuplicate(self, nums):
         """
         :type nums: List[int]
@@ -9,4 +10,21 @@ class Solution(object):
             if items.get(num, None) != None:
                 return True
             items[num] = num
+        return False
+    
+    # sort the input array and determine if adjacent elements are equal
+    def containsDuplicateNaiveAlternative(self, nums):
+        deep_copy = [num for num in nums]
+        deep_copy.sort()
+        for i in range(1, len(deep_copy)):
+            if deep_copy[i] == deep_copy[i - 1]:
+                return True
+        return False
+
+    # brute force approach
+    def containsDuplicateNaive(self, nums):
+        for i in range(len(nums)):
+            for j in range(len(nums)):
+                if i == j: continue
+                if nums[i] == nums[j]: return True
         return False
