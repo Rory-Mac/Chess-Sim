@@ -42,7 +42,7 @@ class ContainsDuplicateII(object):
         item_indices = {}
         for num in nums:
             items.append(num)
-            new_item_index = len(items)
+            new_item_index = len(items) - 1
             if item_indices.get(num, None) == None:
                 item_indices[num] = [new_item_index]
             else:
