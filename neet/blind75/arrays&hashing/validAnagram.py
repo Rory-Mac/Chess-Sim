@@ -15,6 +15,3 @@ class ValidAnagram(object):
             if s_char_counts != t_char_counts:
                 return False
         return True
-
-
-        
