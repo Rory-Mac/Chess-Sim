@@ -6,10 +6,11 @@ class Solution(object):
         :type k: int
         :rtype: List[int]
         """
-        num_frequencies = {}
+        frequencies = {}
         for num in nums:
-            candidate = num_frequencies.get(num, None)
-            if candidate == None:
-                num_frequencies[num] = 1
+            if frequencies.get(num, None) == None:
+                frequencies[num] = 1
             else:
-                num_frequencies[num] += 1
+                frequencies[num] += 1
+        sorted_frequencies = sorted(frequencies.items(), key=lambda item: item[1], reverse= True)
+        return [frequency[0] for frequency in sorted_frequencies[:k]]
