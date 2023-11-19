@@ -1,31 +1,31 @@
 # Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and
 # nums[i] + nums[j] + nums[k] == 0.
 # Notice that the solution set must not contain duplicate triplets.
-
 class ThreeSum(object):
     def threeSum(self, nums):
         """
         :type nums: List[int]
         :rtype: List[List[int]]
         """
+        # a + b + c == 0
+        # [-1,2,-3,4,5]
         nums.sort()
-        solutions = []
-        for skip, num in enumerate(nums):
-            target_sum = -num
-            i = 0 if skip != 0 else 1
-            j = len(nums) - 1 if skip != len(nums) - 1 else len(nums) - 2
+        triplets = []
+        for x, num in enumerate(nums):
+            if x > 0 and num == nums[x - 1]: continue
+            i, j = x + 1, len(nums) - 1
             while i < j:
-                if i == skip:
+                t = num + nums[i] + nums[j]
+                if t < 0:
                     i += 1
-                if j == skip:
+                elif t > 0:
                     j -= 1
-                candidate_sum = nums[i] + nums[j]
-                if candidate_sum == target_sum:
-                    solutions.append([num, nums[i], nums[j]])
+                else:
+                    triplets.append([num, nums[i], nums[j]])
+                    while i < j and nums[i] == nums[i + 1]:
+                        i += 1
+                    while i < j and nums[j] == nums[j - 1]:
+                        j -= 1
                     i += 1
                     j -= 1
-                elif candidate_sum < target_sum:
-                    i += 1
-                elif candidate_sum > target_sum:
-                    j -= 1
-        return solutions
+        return triplets
