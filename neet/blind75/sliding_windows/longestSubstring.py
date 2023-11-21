@@ -46,3 +46,19 @@ class Solution:
                 r += 1
                 char_count += 1
         return max(max_count, char_count)
+    
+    # simplify code
+    def lengthOfLongestSubstringAlt(self, s : str) -> int:
+        l = 0
+        seen = set()
+        max_count = 0
+        for r in range(len(s)):
+            if s[r] not in seen:
+                seen.add(s[r])
+            else:
+                max_count = max(max_count, r - l + 1)
+                while s[r] in seen:
+                    seen.remove(s[l])
+                    l += 1
+                seen.add(s[r])
+        return max(max_count, r - l + 1)
