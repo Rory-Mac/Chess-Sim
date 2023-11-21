@@ -55,10 +55,10 @@ class Solution:
         for r in range(len(s)):
             if s[r] not in seen:
                 seen.add(s[r])
-            else:
                 max_count = max(max_count, r - l + 1)
+            else:
                 while s[r] in seen:
                     seen.remove(s[l])
                     l += 1
                 seen.add(s[r])
-        return max(max_count, r - l + 1)
+        return max_count
