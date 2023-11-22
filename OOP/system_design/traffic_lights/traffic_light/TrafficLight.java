@@ -1,13 +1,14 @@
 package traffic_light;
 
 public class TrafficLight {
-    public TrafficLightState state = new TrafficLightRed(this);
+    private TrafficLightState state = new TrafficLightRed(this);
 
-    void setState(TrafficLightState state) {
+    // Functions pertaining to state of traffic light (using state design pattern)
+    public void setState(TrafficLightState state) {
         this.state = state;
     }
 
-    public void changeState() {
+    public void transition() {
         state.transition();
     }
 }
