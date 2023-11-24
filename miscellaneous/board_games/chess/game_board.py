@@ -41,11 +41,12 @@ class GameBoard:
 
     # returns false if move invalid else returns true
     def makeMove(self, to_coord : (int, int)) -> bool:
-        selected_piece = self.board[self.selected_tile[0]][self.selected_tile[1]]
+        selected_piece = self.board[self.selected_tile[1]][self.selected_tile[0]]
         if selected_piece == None:
             raise LookupError("Chess piece not found at selected tile")
         valid = selected_piece.isMoveValid(to_coord)
         if valid:
-            self.board[to_coord[0]][to_coord[1]] = selected_piece
-            selected_piece = None
+            self.board[to_coord[1]][to_coord[0]] = selected_piece
+            self.board[self.selected_tile[1]][self.selected_tile[0]] = None
+            self.selected_tile = None
         return valid

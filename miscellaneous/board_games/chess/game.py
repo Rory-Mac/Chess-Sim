@@ -65,31 +65,25 @@ for i in range(8):
 #--------------------------------------------------------------------------------------------------------------
 # Helper functions
 #--------------------------------------------------------------------------------------------------------------
-def highlight_tile(tile : (int, int)):
+def draw_tile(tile : (int, int)):
+    x, y = tile[0], tile[1]
     piece = board.get_piece(tile)
-    if not piece: return
-    sprite = game_assests[piece.getColor()][piece.__class__]
+    if piece:
+        sprite = game_assests[piece.getColor()][piece.__class__]
+        screen.blit(sprite, (100*x,100*y))
+
+def highlight_tile(tile : (int, int)):
     x, y = tile[0], tile[1]
     pygame.draw.rect(screen, GREEN, pygame.Rect(100*x, 100*y, 100, 100))
     pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
-    screen.blit(sprite, (100*x,100*y))
+    draw_tile(tile)
 
 def unhighlight_tile(tile : (int, int)):
-    piece = board.get_piece(tile)
-    sprite = game_assests[piece.getColor()][piece.__class__]
     x, y = tile[0], tile[1]
     pygame.draw.rect(screen, BLACK, pygame.Rect(100*x, 100*y, 100, 100))
     pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
-    screen.blit(sprite, (100*x,100*y))
+    draw_tile(tile)
 
-# user clicks on a new tile
-#   if new tile is selected tile
-#       unhighlight
-#   if new tile contains own piece
-#       unhighlight previously selected tile if it exists
-#       highlight and select new tile
-#   if a tile is already selected and new tile does not contain own piece and move is valid
-#       set target tile to none, move piece, unhighlight selected tile
 def process_click_event(click_coord : (int, int)):
     clicked_tile = (click_coord[0] // 100, click_coord[1] // 100)
     clicked_piece = board.get_piece(clicked_tile)
@@ -103,6 +97,7 @@ def process_click_event(click_coord : (int, int)):
         highlight_tile(clicked_tile)
     elif selected_tile and board.makeMove(clicked_tile):
         unhighlight_tile(selected_tile)
+        draw_tile(clicked_tile)
 
 #--------------------------------------------------------------------------------------------------------------
 # Main Game Loop
@@ -121,7 +116,7 @@ while running:
 pygame.quit()
 
 # TODO
-# test move own pieces, replace images
+# test move own pieces
 # create turn based system, check and checkmate
 # two-player on two-processes on local machine, mapping moves between orientations
 # connect machines on separate networks

@@ -63,5 +63,4 @@ class Bishop(ChessPiece):
 class Pawn(ChessPiece):
     def inRange(self, x : int, y : int) -> bool:
         dx = abs(self.x - x)
-        dy = abs(self.y - y)
-        return (dx == dy) and (dx != 0 or dy != 0)
+        return (self.y - y == 1) and dx <= 1
