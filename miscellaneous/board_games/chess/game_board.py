@@ -54,4 +54,5 @@ class GameBoard:
             selected_piece.x, selected_piece.y = to_coord[0], to_coord[1]
             self.board[self.selected_tile[1]][self.selected_tile[0]] = None
             self.selected_tile = None
+            selected_piece.move_count += 1
         return valid

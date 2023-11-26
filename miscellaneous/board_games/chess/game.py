@@ -116,8 +116,13 @@ while running:
 pygame.quit()
 
 # TODO
-# pawn can move two spaces initially
-# check and checkmate 
-# networks doc, turn based system, two players, two processes
-# castling, en passant, promotion, audio
-# write project report (networks doc, licensing, state machine, fix projects page) 
+# run application as two processes exchanging moves, test visualisation of opponent's moves 
+# create turn-based exchange
+# add check with red highlighting
+#   if notified that king is in check, highlight red
+#   if king in check and proposed move does not put king out of check, invalidate
+#   if proposed move puts own king in check, invalidate
+#   if proposed move is valid and puts own king out of check, unhighlight
+#   if proposed move is valid and puts opponents king in check, notify opponent
+# castling, promotion, en passant, audio
+# write project report (licensing, state machine, fix projects page)

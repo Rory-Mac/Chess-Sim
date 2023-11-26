@@ -8,6 +8,7 @@ class PieceColor(Enum):
 class ChessPiece:
     def __init__(self, x : int, y : str, color : PieceColor):
         self.color = color
+        self.move_count = 0
         self.x = x
         self.y = y
 
@@ -126,13 +127,17 @@ class Bishop(ChessPiece):
 class Pawn(ChessPiece):
     def isValid(self, board, to_coord : (int, int)) -> bool:
         target_piece = board.get_piece(to_coord)
-        # pawn must be moving vertically unless taking
-        return (not target_piece and self.x == to_coord[0]) or (target_piece and abs(self.x - to_coord[0]) == 1)
+        same_column = self.x == to_coord[0]
+        # move is valid if moving forward one tile to empty tile, moving forward two tiles if pawn's first move, 
+        # or one tile diagonally to take opponent's piece 
+        return (not target_piece and same_column and self.y - to_coord[1] == 1) or \
+        (not target_piece and same_column and self.move_count == 0 and self.y - to_coord[1] == 2) or \
+        (target_piece and abs(self.x - to_coord[0]) == 1)
 
     def isInRange(self, coord : (int, int)) -> bool:
         dx = abs(self.x - coord[0])
-        return (self.y - coord[1] == 1) and dx <= 1
-    
+        return (dx <= 1 and self.y - coord[1] == 1) or (dx == 0 and self.y - coord[1] == 2)
+
     def isBlocked(self, board, coord : (int, int)) -> bool:
         return False
     
