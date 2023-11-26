@@ -5,6 +5,7 @@ class GameBoard:
     def __init__(self):
         self.board = [[None for _ in range(8)] for _ in range(8)]
         self.selected_tile = None
+        self.orientation = PieceColor.WHITE
         self.__add_pieces([
             Rook(0,0, PieceColor.BLACK), Knight(1,0, PieceColor.BLACK), Bishop(2,0, PieceColor.BLACK), Queen(3,0, PieceColor.BLACK),
             King(4,0, PieceColor.BLACK), Bishop(5,0, PieceColor.BLACK), Knight(6,0, PieceColor.BLACK), Rook(7,0, PieceColor.BLACK)]
@@ -22,6 +23,9 @@ class GameBoard:
     
     def set_selected_tile(self, tile: (int, int)):
         self.selected_tile = tile
+
+    def get_orientation(self):
+        return self.orientation
 
     def __add_piece(self, piece : ChessPiece):
         x, y = piece.getX(), piece.getY()
@@ -44,9 +48,10 @@ class GameBoard:
         selected_piece = self.board[self.selected_tile[1]][self.selected_tile[0]]
         if selected_piece == None:
             raise LookupError("Chess piece not found at selected tile")
-        valid = selected_piece.isMoveValid(to_coord)
+        valid = selected_piece.isMoveValid(self, to_coord)
         if valid:
             self.board[to_coord[1]][to_coord[0]] = selected_piece
+            selected_piece.x, selected_piece.y = to_coord[0], to_coord[1]
             self.board[self.selected_tile[1]][self.selected_tile[0]] = None
             self.selected_tile = None
         return valid

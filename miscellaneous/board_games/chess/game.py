@@ -16,7 +16,6 @@ pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
 # initialise game components
 board = GameBoard()
-game_orientation = PieceColor.WHITE
 # access game assets
 game_assests = {
     PieceColor.BLACK : {
@@ -67,6 +66,7 @@ for i in range(8):
 #--------------------------------------------------------------------------------------------------------------
 def draw_tile(tile : (int, int)):
     x, y = tile[0], tile[1]
+    pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
     piece = board.get_piece(tile)
     if piece:
         sprite = game_assests[piece.getColor()][piece.__class__]
@@ -91,7 +91,7 @@ def process_click_event(click_coord : (int, int)):
     if selected_tile == clicked_tile:
         unhighlight_tile(selected_tile)
         board.set_selected_tile(None)
-    elif clicked_piece and clicked_piece.getColor() == game_orientation:
+    elif clicked_piece and clicked_piece.getColor() == board.get_orientation():
         if selected_tile: unhighlight_tile(selected_tile)
         board.set_selected_tile(clicked_tile)
         highlight_tile(clicked_tile)
@@ -116,9 +116,8 @@ while running:
 pygame.quit()
 
 # TODO
-# test move own pieces
-# create turn based system, check and checkmate
-# two-player on two-processes on local machine, mapping moves between orientations
-# connect machines on separate networks
+# pawn can move two spaces initially
+# check and checkmate 
+# networks doc, turn based system, two players, two processes
 # castling, en passant, promotion, audio
 # write project report (networks doc, licensing, state machine, fix projects page) 
