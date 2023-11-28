@@ -2,21 +2,22 @@ from typing import List
 from game_pieces import *
 
 class GameBoard:
-    def __init__(self):
+    def __init__(self, orientation):
         self.board = [[None for _ in range(8)] for _ in range(8)]
         self.selected_tile = None
-        self.orientation = PieceColor.WHITE
-        self.__add_pieces([
-            Rook(0,0, PieceColor.BLACK), Knight(1,0, PieceColor.BLACK), Bishop(2,0, PieceColor.BLACK), Queen(3,0, PieceColor.BLACK),
-            King(4,0, PieceColor.BLACK), Bishop(5,0, PieceColor.BLACK), Knight(6,0, PieceColor.BLACK), Rook(7,0, PieceColor.BLACK)]
-        )
-        self.__add_pieces([
-            Rook(0,7, PieceColor.WHITE), Knight(1,7, PieceColor.WHITE), Bishop(2,7, PieceColor.WHITE), Queen(3,7, PieceColor.WHITE),
-            King(4,7, PieceColor.WHITE), Bishop(5,7, PieceColor.WHITE), Knight(6,7, PieceColor.WHITE), Rook(7,7, PieceColor.WHITE)]
-        )
-        for i in range(8):
-            self.__add_piece(Pawn(i,1, PieceColor.BLACK))
-            self.__add_piece(Pawn(i,6, PieceColor.WHITE))
+        self.orientation = orientation
+        default_piece_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+        for i, piece in enumerate(default_piece_order):
+            if self.orientation == PieceColor.BLACK:
+                self.__add_piece(piece(i, 0, PieceColor.WHITE))
+                self.__add_piece(Pawn(i, 1, PieceColor.WHITE))
+                self.__add_piece(Pawn(i, 6, PieceColor.BLACK))
+                self.__add_piece(piece(i, 7, PieceColor.BLACK))
+            else:
+                self.__add_piece(piece(i, 0, PieceColor.BLACK))
+                self.__add_piece(Pawn(i, 1, PieceColor.BLACK))
+                self.__add_piece(Pawn(i, 6, PieceColor.WHITE))
+                self.__add_piece(piece(i, 7, PieceColor.WHITE))
 
     def get_selected_tile(self):
         return self.selected_tile
@@ -32,13 +33,6 @@ class GameBoard:
         if self.board[y][x] != None:
             raise LookupError("Piece already exists at provided tile.")
         self.board[y][x] = piece
-    
-    def __add_pieces(self, pieces : List[ChessPiece]):
-        for piece in pieces:
-            x, y = piece.getX(), piece.getY()
-            if self.board[y][x] != None:
-                raise LookupError("Piece already exists at provided tile.")
-            self.board[y][x] = piece
 
     def get_piece(self, tile : (int, int)) -> ChessPiece:
         return self.board[tile[1]][tile[0]]

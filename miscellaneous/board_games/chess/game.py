@@ -15,8 +15,8 @@ screen = pygame.display.set_mode((800, 800))
 pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
 # initialise game components
-board = GameBoard()
-# access game assets
+board = GameBoard(PieceColor.WHITE)
+# game asset dictionary
 game_assests = {
     PieceColor.BLACK : {
         King : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/king_black.png'), (100, 100)),
@@ -40,26 +40,19 @@ screen.fill(BLACK)
 for x in range(8):
     for y in range(8):
         pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
-# draw chess pieces
-screen.blit(game_assests[PieceColor.BLACK][Rook], (0,0))
-screen.blit(game_assests[PieceColor.BLACK][Knight], (100,0))
-screen.blit(game_assests[PieceColor.BLACK][Bishop], (200,0))
-screen.blit(game_assests[PieceColor.BLACK][Queen], (300,0))
-screen.blit(game_assests[PieceColor.BLACK][King], (400,0))
-screen.blit(game_assests[PieceColor.BLACK][Bishop], (500,0))
-screen.blit(game_assests[PieceColor.BLACK][Knight], (600,0))
-screen.blit(game_assests[PieceColor.BLACK][Rook], (700,0))
-screen.blit(game_assests[PieceColor.WHITE][Rook], (0,700))
-screen.blit(game_assests[PieceColor.WHITE][Knight], (100,700))
-screen.blit(game_assests[PieceColor.WHITE][Bishop], (200,700))
-screen.blit(game_assests[PieceColor.WHITE][Queen], (300,700))
-screen.blit(game_assests[PieceColor.WHITE][King], (400,700))
-screen.blit(game_assests[PieceColor.WHITE][Bishop], (500,700))
-screen.blit(game_assests[PieceColor.WHITE][Knight], (600,700))
-screen.blit(game_assests[PieceColor.WHITE][Rook], (700,700))
-for i in range(8):
-    screen.blit(game_assests[PieceColor.BLACK][Pawn], (i*100,100))
-    screen.blit(game_assests[PieceColor.WHITE][Pawn], (i*100,600))
+# draw pieces to screen
+default_piece_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+for i, piece in enumerate(default_piece_order):
+    if board.get_orientation() == PieceColor.BLACK:
+        screen.blit(game_assests[PieceColor.WHITE][piece], (i*100, 0))
+        screen.blit(game_assests[PieceColor.WHITE][Pawn], (i*100, 100))
+        screen.blit(game_assests[PieceColor.BLACK][Pawn], (i*100, 600))
+        screen.blit(game_assests[PieceColor.BLACK][piece], (i*100, 700))
+    else:
+        screen.blit(game_assests[PieceColor.BLACK][piece], (i*100, 0))
+        screen.blit(game_assests[PieceColor.BLACK][Pawn], (i*100, 100))
+        screen.blit(game_assests[PieceColor.WHITE][Pawn], (i*100, 600))
+        screen.blit(game_assests[PieceColor.WHITE][piece], (i*100, 700))
 
 #--------------------------------------------------------------------------------------------------------------
 # Helper functions
@@ -116,7 +109,7 @@ while running:
 pygame.quit()
 
 # TODO
-# run application as two processes exchanging moves, test visualisation of opponent's moves 
+# run application as two process exchanging moves, test visualisation of opponent's moves 
 # create turn-based exchange
 # add check with red highlighting
 #   if notified that king is in check, highlight red
@@ -124,5 +117,7 @@ pygame.quit()
 #   if proposed move puts own king in check, invalidate
 #   if proposed move is valid and puts own king out of check, unhighlight
 #   if proposed move is valid and puts opponents king in check, notify opponent
-# castling, promotion, en passant, audio
 # write project report (licensing, state machine, fix projects page)
+# pawn promotion, castling, en passant, audio 
+# FIX BUGS
+#   initial pawn movement of 2 spaces can jump over pieces
