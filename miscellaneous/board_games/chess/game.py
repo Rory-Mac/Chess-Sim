@@ -109,15 +109,19 @@ while running:
 pygame.quit()
 
 # TODO
-# run application as two process exchanging moves, test visualisation of opponent's moves 
-# create turn-based exchange
+# run application with two clients
+#   IPC (with threads for simultaneous client and listener)
+#   try sockets instead
+#   test sending/receiving player moves, visualise opponent moves
+#   make turn-based
 # add check with red highlighting
 #   if notified that king is in check, highlight red
 #   if king in check and proposed move does not put king out of check, invalidate
 #   if proposed move puts own king in check, invalidate
 #   if proposed move is valid and puts own king out of check, unhighlight
 #   if proposed move is valid and puts opponents king in check, notify opponent
-# write project report (licensing, state machine, fix projects page)
-# pawn promotion, castling, en passant, audio 
+# more features
+#   pawn promotion, castling, en passant, audio
+# write project report (licensing, state machine, fix projects page) 
 # FIX BUGS
 #   initial pawn movement of 2 spaces can jump over pieces
