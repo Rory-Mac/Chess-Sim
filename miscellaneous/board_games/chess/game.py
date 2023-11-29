@@ -108,12 +108,12 @@ while running:
 
 pygame.quit()
 
+
 # TODO
-# run application with two clients
-#   IPC (with threads for simultaneous client and listener)
-#   try sockets instead
-#   test sending/receiving player moves, visualise opponent moves
-#   make turn-based
+# finish first draft player and player_directory
+#   establish initial connection between player and player directory (list players, play player, etc)
+#   establish connection with player (make move, notify opponent, wait to receive move, receive, visualise, repeat)
+#   visualise opponent moves
 # add check with red highlighting
 #   if notified that king is in check, highlight red
 #   if king in check and proposed move does not put king out of check, invalidate
@@ -121,7 +121,7 @@ pygame.quit()
 #   if proposed move is valid and puts own king out of check, unhighlight
 #   if proposed move is valid and puts opponents king in check, notify opponent
 # more features
-#   pawn promotion, castling, en passant, audio
+#   pawn promotion, castling, en passant, audio, board style
 # write project report (licensing, state machine, fix projects page) 
 # FIX BUGS
 #   initial pawn movement of 2 spaces can jump over pieces
