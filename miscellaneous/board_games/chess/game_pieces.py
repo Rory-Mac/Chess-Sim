@@ -1,9 +1,5 @@
 from abc import abstractmethod
-from enum import Enum
-
-class PieceColor(Enum):
-    WHITE = 0
-    BLACK = 1
+from constants import *
 
 class ChessPiece:
     def __init__(self, x : int, y : str, color : PieceColor):

@@ -1,5 +1,6 @@
-from typing import List
+import pygame
 from game_pieces import *
+from constants import *
 
 class GameBoard:
     def __init__(self, orientation):
@@ -18,6 +19,26 @@ class GameBoard:
                 self.__add_piece(Pawn(i, 1, PieceColor.BLACK))
                 self.__add_piece(Pawn(i, 6, PieceColor.WHITE))
                 self.__add_piece(piece(i, 7, PieceColor.WHITE))
+
+    def draw(self, screen, game_assets):
+        # draw overlayed board
+        screen.fill(BLACK)
+        for x in range(8):
+            for y in range(8):
+                pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
+        # draw pieces to screen
+        default_piece_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+        for i, piece in enumerate(default_piece_order):
+            if self.get_orientation() == PieceColor.BLACK:
+                screen.blit(game_assets[PieceColor.WHITE][piece], (i*100, 0))
+                screen.blit(game_assets[PieceColor.WHITE][Pawn], (i*100, 100))
+                screen.blit(game_assets[PieceColor.BLACK][Pawn], (i*100, 600))
+                screen.blit(game_assets[PieceColor.BLACK][piece], (i*100, 700))
+            else:
+                screen.blit(game_assets[PieceColor.BLACK][piece], (i*100, 0))
+                screen.blit(game_assets[PieceColor.BLACK][Pawn], (i*100, 100))
+                screen.blit(game_assets[PieceColor.WHITE][Pawn], (i*100, 600))
+                screen.blit(game_assets[PieceColor.WHITE][piece], (i*100, 700))
 
     def get_selected_tile(self):
         return self.selected_tile

@@ -1,23 +1,16 @@
-import pygame
 import os
+import pygame
+from constants import *
+from player import Player
 from game_board import GameBoard, PieceColor, King, Queen, Bishop, Knight, Rook, Pawn
 
 #--------------------------------------------------------------------------------------------------------------
 # Initialisation
 #--------------------------------------------------------------------------------------------------------------
-# game constants
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-# initialise game
 pygame.init()
 screen = pygame.display.set_mode((800, 800))
 pygame.display.set_caption("Chess")
-clock = pygame.time.Clock()
-# initialise game components
-board = GameBoard(PieceColor.WHITE)
-# game asset dictionary
-game_assests = {
+game_assets = {
     PieceColor.BLACK : {
         King : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/king_black.png'), (100, 100)),
         Queen : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/queen_black.png'), (100, 100)),
@@ -35,25 +28,9 @@ game_assests = {
         Pawn : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/pawn_white.png'), (100, 100))
     }
 }
-# draw overlayed board
-screen.fill(BLACK)
-for x in range(8):
-    for y in range(8):
-        pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
-# draw pieces to screen
-default_piece_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
-for i, piece in enumerate(default_piece_order):
-    if board.get_orientation() == PieceColor.BLACK:
-        screen.blit(game_assests[PieceColor.WHITE][piece], (i*100, 0))
-        screen.blit(game_assests[PieceColor.WHITE][Pawn], (i*100, 100))
-        screen.blit(game_assests[PieceColor.BLACK][Pawn], (i*100, 600))
-        screen.blit(game_assests[PieceColor.BLACK][piece], (i*100, 700))
-    else:
-        screen.blit(game_assests[PieceColor.BLACK][piece], (i*100, 0))
-        screen.blit(game_assests[PieceColor.BLACK][Pawn], (i*100, 100))
-        screen.blit(game_assests[PieceColor.WHITE][Pawn], (i*100, 600))
-        screen.blit(game_assests[PieceColor.WHITE][piece], (i*100, 700))
-
+clock = pygame.time.Clock()
+board = GameBoard(PieceColor.WHITE)
+player = Player()
 #--------------------------------------------------------------------------------------------------------------
 # Helper functions
 #--------------------------------------------------------------------------------------------------------------
@@ -62,7 +39,7 @@ def draw_tile(tile : (int, int)):
     pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
     piece = board.get_piece(tile)
     if piece:
-        sprite = game_assests[piece.getColor()][piece.__class__]
+        sprite = game_assets[piece.getColor()][piece.__class__]
         screen.blit(sprite, (100*x,100*y))
 
 def highlight_tile(tile : (int, int)):
@@ -92,9 +69,41 @@ def process_click_event(click_coord : (int, int)):
         unhighlight_tile(selected_tile)
         draw_tile(clicked_tile)
 
+def exit_game():
+    pygame.quit()
+    exit(0)
+
+# run initial CLI between player and player directory
+def player_CLI():
+    while True:
+        cmd = input("Input command: ")
+        cmd_words = cmd.split()
+        if cmd_words[0] == "help":
+            print("\thelp : list all commands")
+            print("\tlist : list all available players")
+            print("\trequest [player]: list all available players")
+            print("\texit : exit command-line interface")
+        elif cmd_words[0] == "list":
+            player.list_players()
+        elif cmd_words[0] == "request":
+            if player.game_request(cmd_words[1]): 
+                print("Request Accepted.")
+                break
+            else:
+                print("Request Denied.")
+        elif cmd == "exit":
+            player.leave_player_directory()
+            exit_game()
+        else:
+            print("Commant not found. Type 'help' for list of commands.")
+
 #--------------------------------------------------------------------------------------------------------------
 # Main Game Loop
 #--------------------------------------------------------------------------------------------------------------
+player.set_user_handle(input("Enter username: "))
+player.join_player_directory()
+player_CLI()
+board.draw(screen, game_assets)
 running = True
 while running:
     for event in pygame.event.get():
@@ -102,18 +111,13 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             process_click_event(pygame.mouse.get_pos())
-    # next frame
     pygame.display.flip()
     clock.tick(60)
-
-pygame.quit()
-
+exit_game()
 
 # TODO
-# finish first draft player and player_directory
-#   establish initial connection between player and player directory (list players, play player, etc)
-#   establish connection with player (make move, notify opponent, wait to receive move, receive, visualise, repeat)
-#   visualise opponent moves
+# finish connection routes between player, opponent and player directory
+# finish exchange between connected player and opponent (make move, notify opponent, wait to receive move, receive, visualise, repeat)
 # add check with red highlighting
 #   if notified that king is in check, highlight red
 #   if king in check and proposed move does not put king out of check, invalidate
@@ -121,7 +125,7 @@ pygame.quit()
 #   if proposed move is valid and puts own king out of check, unhighlight
 #   if proposed move is valid and puts opponents king in check, notify opponent
 # more features
-#   pawn promotion, castling, en passant, audio, board style
+#   pawn promotion, castling, en passant, audio, board style, resolution of 45x45px
 # write project report (licensing, state machine, fix projects page) 
 # FIX BUGS
 #   initial pawn movement of 2 spaces can jump over pieces
