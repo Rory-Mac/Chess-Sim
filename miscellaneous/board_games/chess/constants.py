@@ -11,3 +11,7 @@ PACKET_MAX_SIZE = 1024
 class PieceColor(Enum):
     WHITE = 0
     BLACK = 1
+
+class PlayerStatus(Enum):
+    ONLINE = 0
+    INGAME = 1

@@ -7,4 +7,5 @@ Simulation and testing occurs by instantiating the application process many time
 between connected devices on a distributed system with IPC-based calls on the host machine. Deployment could be easily achieved by running
 the player directory on a headless cloud server, and replacing hard-coded loopback addresses with the actual IP address of the runtime
 device. As a hobby project, Chess-Sim does not require implementation of less trivial distributed design features, such as the pipelining
-involved in displaying viewer and impression counts live, thus the system is easily scalable for increased user-base. 
+involved in live display of viewer and impression count, thus the system is easily scalable for an increased user-base by simply adding
+centralised servers with load-balancers.

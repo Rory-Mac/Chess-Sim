@@ -4,53 +4,69 @@ from constants import *
 
 class PlayerDirectory:
     def __init__(self):
-        self.connections = {}
-        self.online_players = {}
-        self.ingame_players = {}
-        self.player_addresses = {}
         self.socket = socket(AF_INET, SOCK_STREAM)
+        # player-address key-value pair in online_players is address-player key-value pair in online_player_addresses 
+        self.online_players = {}
+        self.online_player_addresses = {}
+        # player-address key-value pair in ingame_players is address-player key-value pair in ingame_player_addresses
+        self.ingame_players = {}
+        self.ingame_player_addresses = {}
+        # player directory listens for connections on initialisation
         self.__listen()
 
     def __listen(self):
         self.socket.bind(PLAYER_DIRECTORY_ADDR)
         self.socket.listen()
         while True:
-            client_socket, client_address = self.socket.accept()
+            client_connection, client_address = self.socket.accept()
             print(f"Connection accepted from {client_address}")
-            client_handler = threading.Thread(target=self.__client_handler, args=(client_socket))
+            self.online_player_addresses[client_address] = "unknown"
+            client_handler = threading.Thread(target=self.__client_handler, args=(client_connection))
             client_handler.start()
-            
-    def __client_handler(self, client_socket):
+
+    # entry point for threaded processing of all client requests
+    def __client_handler(self, client_connection):
         while True:
-            data = client_socket.recv(1024)
+            data = client_connection.recv(1024)
             if not data: break
             data = data.decode('utf-8')
             data_words = data.split()
-            print(f"Received data from {client_socket.getpeername()}: {data}")
+            print(f"Received data from {client_connection.getpeername()}: {data}")
             if data_words[0] == "set-username":
-                pass
+                self.__set_username(client_connection, data_words[1])
             elif data_words[0] == "leave":
                 pass
             elif data_words[0] == "list-all":
-                pass
+                self.__list_players(client_connection)
             elif data_words[0] == "game-request":
                 pass
             elif data_words[0] == "notify-game-address":
                 pass
             response = "Message received successfully"
-            client_socket.send(response.encode('utf-8'))
+            client_connection.send(response.encode('utf-8'))
 
-    def listPlayers(self):
-        pass
+    def __set_username(self, client_connection, username):
+        if self.online_players.get(username, None):
+            response = "Username Taken."
+            client_connection.send(response.encode('utf-8'))
+            return
+        old_username = self.online_player_addresses[client_connection]
+        self.online_player_addresses[client_connection] = username
+        self.online_players.pop(old_username)
+        self.online_players[username] = client_connection
 
-    def game_request(self):
-        pass
+    def __list_players(self, client_connection):
+        response = self.online_players.values()
+        client_connection.send(response.encode('utf-8'))
 
-    def update_status(self):
+    def __game_request(self):
         pass
 
 # process player requests:
-#   join
-#   leave
-#   list-all
+#   finish set username and list players
+#   leave command
 #   game-request
+
+# when a player connects
+#   they have an address, they set a username
+#   initially online, when they join a game, they are in-game, when the game ends, they are online

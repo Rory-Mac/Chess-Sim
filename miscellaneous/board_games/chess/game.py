@@ -118,6 +118,7 @@ exit_game()
 # TODO
 # finish connection routes between player, opponent and player directory
 # finish exchange between connected player and opponent (make move, notify opponent, wait to receive move, receive, visualise, repeat)
+# update threading (how to handle traffic if there are more connections than there are threads)
 # add check with red highlighting
 #   if notified that king is in check, highlight red
 #   if king in check and proposed move does not put king out of check, invalidate
@@ -126,6 +127,7 @@ exit_game()
 #   if proposed move is valid and puts opponents king in check, notify opponent
 # more features
 #   pawn promotion, castling, en passant, audio, board style, resolution of 45x45px
-# write project report (licensing, state machine, fix projects page) 
+# update markdown with code segments
+# write project report (licensing, state machine, fix projects page)
 # FIX BUGS
 #   initial pawn movement of 2 spaces can jump over pieces
