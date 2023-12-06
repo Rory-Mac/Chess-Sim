@@ -108,14 +108,5 @@ class Player:
             data_words = data.split()
             if data_words[0] == "listen":
                 self.listen_for_opponent()
-
-
-# start player runtime,
-# enter CLI, when game request accepted,
-# enter game context, when game ends,
-# enter CLI context
-
-
-# player is created, user name set, joins player directory, server handler starts, CLI starts
-# when in game, neither threads are necessary
-# after game, threads should resume
+            else:
+                print(data)

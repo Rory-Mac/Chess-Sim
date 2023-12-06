@@ -33,18 +33,25 @@ while play_again:
     if play_again: start_game()
 
 # TODO
-# finish connection routes between player, opponent and player directory
-# finish exchange between connected player and opponent (make move, notify opponent, wait to receive move, receive, visualise, repeat)
-# update threading (how to handle traffic if there are more connections than there are threads)
-# add check with red highlighting
-#   if notified that king is in check, highlight red
-#   if king in check and proposed move does not put king out of check, invalidate
-#   if proposed move puts own king in check, invalidate
-#   if proposed move is valid and puts own king out of check, unhighlight
-#   if proposed move is valid and puts opponents king in check, notify opponent
-# more features
-#   pawn promotion, castling, en passant, audio, board style, resolution of 45x45px
+# work on primary use case:
+#   P1 connects with server
+#   P2 connects with server
+#   P1 lists players
+#   P1 requests game with P2
+#   P2 accepts
+#   P1 and P2 enter game context
+#   P1 and P2 exit game context
+#   P1 and P2 re-enter CLI context
+# game move exchange (player makes move, notifies opponent, receives move, renders, and so on)
+# MORE FEATURES
+#   check with red highlighting
+#       if notified that king is in check, highlight red
+#       if king in check and proposed move does not put king out of check, invalidate
+#       if proposed move puts own king in check, invalidate
+#       if proposed move is valid and puts own king out of check, unhighlight
+#       if proposed move is valid and puts opponents king in check, notify opponent
+#   initial pawn movement of 2 spaces can jump over pieces
+#   pawn promotion, castling, en passant, 
+#   audio, board style, resolution of 45x45px
 # update markdown with code segments
 # write project report (licensing, state machine, fix projects page)
-# FIX BUGS
-#   initial pawn movement of 2 spaces can jump over pieces

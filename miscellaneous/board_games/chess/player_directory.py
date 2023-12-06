@@ -35,7 +35,8 @@ class PlayerDirectory:
             if data_words[0] == "set-username":
                 self.__set_username(client_connection, data_words[1])
             elif data_words[0] == "leave":
-                pass
+                self.__remove_player(client_connection)
+                return
             elif data_words[0] == "list-all":
                 self.__list_players(client_connection)
             elif data_words[0] == "game-request":
@@ -44,6 +45,11 @@ class PlayerDirectory:
                 pass
             response = "Message received successfully"
             client_connection.send(response.encode('utf-8'))
+
+    def __remove_player(self, client_connection):
+        player_address = client_connection.getpeername()
+        player_username = self.online_player_addresses.pop(player_address)
+        self.online_players.pop(player_username)
 
     def __set_username(self, client_connection, username):
         if self.online_players.get(username, None):
@@ -59,14 +65,15 @@ class PlayerDirectory:
         response = self.online_players.values()
         client_connection.send(response.encode('utf-8'))
 
-    def __game_request(self):
+    def __game_request(self, username):
         pass
 
-# process player requests:
-#   finish set username and list players
-#   leave command
-#   game-request
-
-# when a player connects
-#   they have an address, they set a username
-#   initially online, when they join a game, they are in-game, when the game ends, they are online
+#   game-request/notify-game-address
+#   current connection P1 makes game request to P2
+#   find address mapped to P2 username
+#   ask if P2 wants to accept request
+#   P2 responds, if response rejected, notify P1, continue
+#   if response accepted, P2 listens for opponent and notifies server of address
+#   server notifies P1 of address which then connects to P2
+#   game ends, P1/P2 send game over packet to server
+#   server moves players from in-game status to online status
