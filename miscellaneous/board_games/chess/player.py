@@ -3,15 +3,22 @@ from constants import *
 from threading import Thread
 
 class Player:
-    def __init__(self, user_handle=None):
-        self.user_handle = user_handle
+    def __init__(self, application):
+        self.application = application
+        self.game_trigger = None
+        self.user_handle = input("Enter username: ")
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         self.opponent_socket = socket(AF_INET, SOCK_STREAM)
         self.opponent_connection = None
-        self.moves = []
+        self.opponent_moves = []
+        self.join_player_directory()
+        self.start_server_listener()
 
-    def set_user_handle(self, user_handle):
-        self.user_handle = user_handle
+    def get_game_trigger(self):
+        return self.game_trigger
+    
+    def reset_game_trigger(self):
+        self.game_trigger = None
 
     def join_player_directory(self):
         self.server_socket.connect(PLAYER_DIRECTORY_ADDR)
@@ -34,24 +41,30 @@ class Player:
         message = f"game-request {opponent_address}"
         self.server_socket.send(message.encode('utf-8'))
         response = self.server_socket.recv(PACKET_MAX_SIZE)
-        if response == "success":
-            opponent_address = self.server_socket.recv(PACKET_MAX_SIZE)
-            self.__connect_to_opponent(opponent_address)
-            return True
-        elif response == "failure":
-            return False
+        response_words = response.split()
+        if response_words[0] == "accepted":
+            print("Request Accepted.")
+            self.__connect_to_opponent(response_words[1])
+            # start thread listening for opponent moves
+            opponent_thread = Thread(target=self.__opponent_handler, args=())
+            opponent_thread.start()
+            return response_words[2] # game orientation
+        if response_words[0] == "denied":
+            print("Request Denied.")
+        return False
 
     def __connect_to_opponent(self, opponent_addr):    
         self.opponent_socket.connect(opponent_addr)
         print(f"Connection made and game started with {self.opponent_socket.getpeername()}")
 
-    def listen_for_opponent(self):
+    def __listen_for_opponent(self):
         print("listening for opponent...")
         self.opponent_socket.bind(('localhost', 0))
+        # notify player directory of listening address
+        message = f"{self.opponent_socket.getsockname()}"
+        self.server_socket.send(message.encode('utf-8')) 
+        # start listening for opponent connection
         self.opponent_socket.listen()
-        # notify player directory of listening port
-        message = f"notify-game-address {self.opponent_socket.getsockname()}"
-        self.server_socket.send(message.encode('utf-8'))
         # accept inbound connection to start game
         connection, address = self.opponent_socket.accept()
         self.opponent_connection = connection
@@ -62,51 +75,37 @@ class Player:
             self.opponent_connection.send(move.encode('utf-8'))
         else:
             self.opponent_socket.send(move.encode('utf-8'))
-        self.moves.append(move)
 
-    def get_opponent_move(self):
-        if self.connection:
-            move = self.opponent_connection.recv(PACKET_MAX_SIZE)
-        else:
-            move = self.opponent_socket.recv(PACKET_MAX_SIZE)
-        self.moves.append(move)
-
-    # main player to player directory interface
-    def enter_CLI(self):
-        while True:
-            cmd = input("Input command: ")
-            cmd_words = cmd.split()
-            if cmd_words[0] == "help":
-                print("\thelp : list all commands")
-                print("\tlist : list all available players")
-                print("\trequest [player] : request game with player")
-                print("\texit : exit command-line interface")
-            elif cmd_words[0] == "list":
-                self.list_players()
-            elif cmd_words[0] == "request":
-                if self.game_request(cmd_words[1]): 
-                    print("Request Accepted.")
-                    return True
-                else:
-                    print("Request Denied.")
-            elif cmd == "exit":
-                self.leave_player_directory()
-                return False
-            else:
-                print("Command not found. Type 'help' for list of commands.")
-
-    def start(self):
-        self.set_user_handle(input("Enter username: "))
-        self.join_player_directory()
-        # listen for server interrupts
+    # listen for server interrupts
+    def start_server_listener(self):
         server_thread = Thread(target=self.__server_handler, args=())
         server_thread.start()
 
     def __server_handler(self):
         while True:
-            data = self.server_socket.recv(1024)
+            data = self.server_socket.recv(PACKET_MAX_SIZE)
             data_words = data.split()
-            if data_words[0] == "listen":
-                self.listen_for_opponent()
+            if data_words[0] == "incoming-request":
+                response = input(f"Incoming-request from {data_words[1]}. Type \"Accept\" or \"Deny\": ")
+                self.server_socket.send(response.encode('utf-8'))
+                if response == "deny": continue
+                elif response == "accept":
+                    self.__listen_for_opponent()
+                    game_orientation = self.server_socket.recv(PACKET_MAX_SIZE).decode('utf-8')
+                    self.in_game = game_orientation
+                    self.__opponent_handler()
             else:
                 print(data)
+
+    def __opponent_handler(self):
+        while True:
+            if self.opponent_connection:
+                move = self.opponent_connection.recv(PACKET_MAX_SIZE)
+            else:
+                move = self.opponent_socket.recv(PACKET_MAX_SIZE)
+            if move == "termination": break
+            self.opponent_moves.append(move)
+
+# fix make move
+# opponent_thread = Thread(target=self.__opponent_handler, args=())
+# self.__opponent_handler()

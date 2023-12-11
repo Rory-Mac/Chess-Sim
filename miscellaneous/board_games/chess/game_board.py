@@ -48,7 +48,7 @@ class GameBoard:
         # draw pieces to screen
         default_piece_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
         for i, piece in enumerate(default_piece_order):
-            if self.get_orientation() == PieceColor.BLACK:
+            if self.orientation == PieceColor.BLACK:
                 screen.blit(self.game_assets[PieceColor.WHITE][piece], (i*100, 0))
                 screen.blit(self.game_assets[PieceColor.WHITE][Pawn], (i*100, 100))
                 screen.blit(self.game_assets[PieceColor.BLACK][Pawn], (i*100, 600))
@@ -79,15 +79,6 @@ class GameBoard:
         pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
         self.draw_tile(tile)
 
-    def get_selected_tile(self):
-        return self.selected_tile
-    
-    def set_selected_tile(self, tile: (int, int)):
-        self.selected_tile = tile
-
-    def get_orientation(self):
-        return self.orientation
-
     def __add_piece(self, piece : ChessPiece):
         x, y = piece.getX(), piece.getY()
         if self.board[y][x] != None:
@@ -111,17 +102,19 @@ class GameBoard:
             selected_piece.move_count += 1
         return valid
     
-    def process_click_event(self, board, screen, click_coord : (int, int)):
+    # if click event triggers a move on player's turn, return that move, else return none
+    def process_click_event(self, screen, turn, click_coord : (int, int)):
         clicked_tile = (click_coord[0] // 100, click_coord[1] // 100)
         clicked_piece = self.get_piece(clicked_tile)
-        selected_tile = self.get_selected_tile()
-        if selected_tile == clicked_tile:
-            self.unhighlight_tile(screen, selected_tile)
-            self.set_selected_tile(None)
-        elif clicked_piece and clicked_piece.getColor() == self.get_orientation():
-            if selected_tile: self.unhighlight_tile(screen, selected_tile)
-            self.set_selected_tile(clicked_tile)
+        if self.selected_tile == clicked_tile: # unselect tile
+            self.unhighlight_tile(screen, self.selected_tile)
+            self.selected_tile = None
+        elif clicked_piece and clicked_piece.getColor() == self.orientation: # select tile (own piece)
+            if self.selected_tile: self.unhighlight_tile(screen, self.selected_tile)
+            self.selected_tile = clicked_tile
             self.highlight_tile(screen, clicked_tile)
-        elif selected_tile and self.makeMove(clicked_tile):
-            self.unhighlight_tile(screen, selected_tile)
+        elif self.selected_tile and turn == self.orientation and self.makeMove(clicked_tile): # select a move
+            self.unhighlight_tile(screen, self.selected_tile)
             self.draw_tile(screen, clicked_tile)
+            return (self.selected_tile, clicked_tile)
+        return None

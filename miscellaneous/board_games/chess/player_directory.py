@@ -1,4 +1,5 @@
 import threading
+import random
 from socket import *
 from constants import *
 
@@ -12,6 +13,7 @@ class PlayerDirectory:
         self.ingame_players = {}
         self.ingame_player_addresses = {}
         # player directory listens for connections on initialisation
+        self.connections = {} # maps player addresses with connections
         self.__listen()
 
     def __listen(self):
@@ -21,6 +23,7 @@ class PlayerDirectory:
             client_connection, client_address = self.socket.accept()
             print(f"Connection accepted from {client_address}")
             self.online_player_addresses[client_address] = "unknown"
+            self.connections[client_address] = client_connection
             client_handler = threading.Thread(target=self.__client_handler, args=(client_connection))
             client_handler.start()
 
@@ -40,9 +43,7 @@ class PlayerDirectory:
             elif data_words[0] == "list-all":
                 self.__list_players(client_connection)
             elif data_words[0] == "game-request":
-                pass
-            elif data_words[0] == "notify-game-address":
-                pass
+                self.__game_request(client_connection, data_words[1])
             response = "Message received successfully"
             client_connection.send(response.encode('utf-8'))
 
@@ -65,15 +66,22 @@ class PlayerDirectory:
         response = self.online_players.values()
         client_connection.send(response.encode('utf-8'))
 
-    def __game_request(self, username):
-        pass
+    def __game_request(self, user_connection, opponent_username):
+        opponent_address = self.online_players[opponent_username]
+        opponent_connection = self.connections[opponent_address]
+        message = f"incoming-request {self.online_player_addresses[user_connection]}"
+        opponent_connection.send(message.encode('utf-8'))
+        message = opponent_connection.recv(1024).decode('utf-8')
+        if message == "accept":
+            user_listening_addr = opponent_connection.recv(1024).decode('utf-8')
+            user_color = random.choice(["white", "black"])
+            opponent_color = "black" if user_color == "white" else "white"
+            message = f"accepted {user_listening_addr} {user_color}"
+            user_connection.send(message.encode('utf-8'))
+            message = f"{opponent_color}"
+            opponent_connection.send(message.encode('utf-8'))
+        elif message == "deny":
+            message = f"denied"
+            user_connection.send(message.encode('utf-8'))
 
-#   game-request/notify-game-address
-#   current connection P1 makes game request to P2
-#   find address mapped to P2 username
-#   ask if P2 wants to accept request
-#   P2 responds, if response rejected, notify P1, continue
-#   if response accepted, P2 listens for opponent and notifies server of address
-#   server notifies P1 of address which then connects to P2
-#   game ends, P1/P2 send game over packet to server
-#   server moves players from in-game status to online status
+    
