@@ -63,8 +63,7 @@ class App:
 App()
 
 # TODO
-# do we need to encode as utf-8? How to transfer a simple tuple?
-
+# get rid of utf-8 encoding/decoding, use pickle dumps and pickle loads
 # run/debug player connection with opponent and move exchange
 # run server
 # P1 joins server
@@ -91,8 +90,9 @@ App()
 #       if proposed move is valid and puts opponents king in check, notify opponent
 #   initial pawn movement of 2 spaces can jump over pieces
 #   pawn promotion, castling, en passant,
-#   make board prettier (gridded-colors light-green/dark-green, custom images, smaller window size) 
+#   make board prettier (gridded-colors light-green/dark-green, custom images, smaller window size)
 # FURTHER FEATURES
+#   add function docstrings, return/argument types
 #   add custom packet structure (replace strings with bits)
 #   audio
 #   stress test to get optimal threading count
