@@ -1,11 +1,12 @@
-import threading
 import random
+import threading
 from socket import *
 from constants import *
+from concurrent.futures import ThreadPoolExecutor
 
 class ServerApp:
     def __init__(self):
-        self.socket = socket(AF_INET, SOCK_STREAM)
+        self.client_connections = []
         # player-address key-value pair in online_players is address-player key-value pair in online_player_addresses 
         self.online_players = {}
         self.online_player_addresses = {}
@@ -13,30 +14,39 @@ class ServerApp:
         self.ingame_players = {}
         self.ingame_player_addresses = {}
         # threaded listener listens for inbound connections, main thread enters administrative CLI
-        self.connections = {} # maps connection addresses with open connections
-        listener = threading.Thread(target=self.__listen, args=())
-        listener.start()
+        self.socket = socket(AF_INET, SOCK_STREAM)
+        self.socket.bind(PLAYER_DIRECTORY_ADDR)
+        server_listener = threading.Thread(target=self.__start_server, args=())
+        server_listener.daemon = True
+        server_listener.start()
         self.__CLI()
 
-    def __CLI():
-        pass
-
-    def __listen(self):
-        self.socket.bind(PLAYER_DIRECTORY_ADDR)
-        self.socket.listen()
+    def __CLI(self):
         while True:
-            client_connection, client_address = self.socket.accept()
-            print(f"Connection accepted from {client_address}")
-            self.online_player_addresses[client_address] = "unknown"
-            self.connections[client_address] = client_connection
-            client_handler = threading.Thread(target=self.__client_handler, args=(client_connection))
-            client_handler.start()
+            cmd = input("Enter Command: ")
+            if cmd == "exit":
+                self.__close_server()
+                break
 
-    # entry point for threaded processing of all client requests
+    def __start_server(self):
+        self.socket.listen()
+        with ThreadPoolExecutor(max_workers=48) as executor:
+            while True:
+                conn, addr = self.socket.accept()
+                # process/store client connection
+                self.online_player_addresses[addr] = "unknown"
+                self.client_connections[addr] = conn
+                self.client_connections.append(conn)
+                print(f"Connection accepted from {addr}")
+                # assign handling of client connection to thread pool
+                executor.submit(self.__client_handler, conn)
+
+    # entry point for threaded processing of client requests
     def __client_handler(self, client_connection):
         while True:
             data = client_connection.recv(1024)
-            if not data: break
+            if not data:
+                break
             data = data.decode('utf-8')
             data_words = data.split()
             print(f"Received data from {client_connection.getpeername()}: {data}")
@@ -44,13 +54,14 @@ class ServerApp:
                 self.__set_username(client_connection, data_words[1])
             elif data_words[0] == "leave":
                 self.__remove_player(client_connection)
-                return
+                break
             elif data_words[0] == "list-all":
                 self.__list_players(client_connection)
             elif data_words[0] == "game-request":
                 self.__game_request(client_connection, data_words[1])
             response = "Message received successfully"
             client_connection.send(response.encode('utf-8'))
+        client_connection.close()
 
     def __remove_player(self, client_connection):
         player_address = client_connection.getpeername()
@@ -73,7 +84,7 @@ class ServerApp:
 
     def __game_request(self, user_connection, opponent_username):
         opponent_address = self.online_players[opponent_username]
-        opponent_connection = self.connections[opponent_address]
+        opponent_connection = self.client_connections[opponent_address]
         message = f"incoming-request {self.online_player_addresses[user_connection]}"
         opponent_connection.send(message.encode('utf-8'))
         message = opponent_connection.recv(1024).decode('utf-8')
@@ -89,10 +100,10 @@ class ServerApp:
             message = f"denied"
             user_connection.send(message.encode('utf-8'))
 
+    def __close_server(self):
+        for conn in self.client_connections:
+            conn.close()
+        self.socket.close()
+
 ServerApp()
 
-# create a thread pool
-#   main thread establishes a thread listening to inbound connections and a thread pool of threads processing inbound packets
-#   
-# 
-# create simple CLI
