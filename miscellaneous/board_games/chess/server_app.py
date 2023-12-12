@@ -3,7 +3,7 @@ import random
 from socket import *
 from constants import *
 
-class PlayerDirectory:
+class ServerApp:
     def __init__(self):
         self.socket = socket(AF_INET, SOCK_STREAM)
         # player-address key-value pair in online_players is address-player key-value pair in online_player_addresses 
@@ -12,9 +12,14 @@ class PlayerDirectory:
         # player-address key-value pair in ingame_players is address-player key-value pair in ingame_player_addresses
         self.ingame_players = {}
         self.ingame_player_addresses = {}
-        # player directory listens for connections on initialisation
-        self.connections = {} # maps player addresses with connections
-        self.__listen()
+        # threaded listener listens for inbound connections, main thread enters administrative CLI
+        self.connections = {} # maps connection addresses with open connections
+        listener = threading.Thread(target=self.__listen, args=())
+        listener.start()
+        self.__CLI()
+
+    def __CLI():
+        pass
 
     def __listen(self):
         self.socket.bind(PLAYER_DIRECTORY_ADDR)
@@ -84,4 +89,10 @@ class PlayerDirectory:
             message = f"denied"
             user_connection.send(message.encode('utf-8'))
 
-    
+ServerApp()
+
+# create a thread pool
+#   main thread establishes a thread listening to inbound connections and a thread pool of threads processing inbound packets
+#   
+# 
+# create simple CLI

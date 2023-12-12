@@ -6,7 +6,7 @@ from game_board import GameBoard, PieceColor
 #--------------------------------------------------------------------------------------------------------------
 # Main Game Loop
 #--------------------------------------------------------------------------------------------------------------
-class Application:
+class App:
     def __init__(self):
         self.player = Player(self)
         self.__CLI()
@@ -42,8 +42,8 @@ class Application:
         pygame.init()
         clock = pygame.time.Clock()
         board = GameBoard(game_orientation)
-        turn = game_orientation
         screen = pygame.display.set_mode((800, 800))
+        turn = game_orientation
         pygame.display.set_caption("Chess")
         board.draw(screen)
         running = True
@@ -54,24 +54,33 @@ class Application:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     move = board.process_click_event(screen, turn, pygame.mouse.get_pos())
                     if move:
-                        self.player.make_move(move)
+                        self.player.send_move(move)
                         turn = PieceColor.BLACK if turn == PieceColor.WHITE else PieceColor.WHITE
             pygame.display.flip()
             clock.tick(60)
         pygame.quit()
 
-app = Application()
+App()
 
 # TODO
-#   when a move is received, visualise move, turnover
-# run and debug player/server/opponent connections, expected behavior is as follows:
-#   run server, P1 and P2 proccesses on separate terminals
-#   enter P1 username, join server, enter P2 username, join server
-#   list 
-# work on move exchange (player makes move, notifies opponent, receives move, renders, and so on)
-# run and debug move exchange and visualisation
-# website project page + github project page (licensing, network diagrams, state machines, markdown with code segments, fix projects page)
-# MORE FEATURES
+# run/debug player connection with opponent and move exchange
+# run server
+# P1 joins server
+# P1 lists players
+# P2 joins server
+# P2 lists players
+# P1 lists players
+# P1 requests game with P2
+# P2 denies
+# P1 requests game with P2
+# P2 accepts
+# P1 makes move
+# P2 receives move
+# P2 makes move
+# P1 receives move
+
+# visualise opponent moves, run/debug
+# GET IT WORKING
 #   check with red highlighting
 #       if notified that king is in check, highlight red
 #       if king in check and proposed move does not put king out of check, invalidate
@@ -79,8 +88,12 @@ app = Application()
 #       if proposed move is valid and puts own king out of check, unhighlight
 #       if proposed move is valid and puts opponents king in check, notify opponent
 #   initial pawn movement of 2 spaces can jump over pieces
-#   pawn promotion, castling, en passant, 
-#   audio, board style, resolution of 45x45px
-#   what if player force quits
+#   pawn promotion, castling, en passant,
+#   make board prettier (gridded-colors light-green/dark-green, custom images, smaller window size) 
+# FURTHER FEATURES
 #   add custom packet structure (replace strings with bits)
+#   audio
+#   stress test to get optimal threading count
+#   what if player force quits
 #   add user accounts + authentication
+# website project page + github project page (licensing, network diagrams, state machines, markdown with code segments, fix projects page)

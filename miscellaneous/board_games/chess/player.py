@@ -10,9 +10,9 @@ class Player:
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         self.opponent_socket = socket(AF_INET, SOCK_STREAM)
         self.opponent_connection = None
-        self.opponent_moves = []
-        self.join_player_directory()
-        self.start_server_listener()
+        self.move_history = []
+        self.__join_player_directory()
+        self.__start_server_listener()
 
     def get_game_trigger(self):
         return self.game_trigger
@@ -20,7 +20,7 @@ class Player:
     def reset_game_trigger(self):
         self.game_trigger = None
 
-    def join_player_directory(self):
+    def __join_player_directory(self):
         self.server_socket.connect(PLAYER_DIRECTORY_ADDR)
         print(f"Connection made with {self.server_socket.getpeername()}")
         message = f"set-username {self.user_handle}"
@@ -70,14 +70,8 @@ class Player:
         self.opponent_connection = connection
         print(f"Connection accepted from opponent {address}")
 
-    def make_move(self, move):
-        if self.opponent_connection:
-            self.opponent_connection.send(move.encode('utf-8'))
-        else:
-            self.opponent_socket.send(move.encode('utf-8'))
-
     # listen for server interrupts
-    def start_server_listener(self):
+    def __start_server_listener(self):
         server_thread = Thread(target=self.__server_handler, args=())
         server_thread.start()
 
@@ -104,8 +98,11 @@ class Player:
             else:
                 move = self.opponent_socket.recv(PACKET_MAX_SIZE)
             if move == "termination": break
-            self.opponent_moves.append(move)
+            self.move_history.append(move)
 
-# fix make move
-# opponent_thread = Thread(target=self.__opponent_handler, args=())
-# self.__opponent_handler()
+    def send_move(self, move):
+        if self.opponent_connection:
+            self.opponent_connection.send(move.encode('utf-8'))
+        else:
+            self.opponent_socket.send(move.encode('utf-8'))
+        self.move_history.append(move)
