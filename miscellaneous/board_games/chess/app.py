@@ -28,7 +28,7 @@ class App:
                 game_orientation = PieceColor.WHITE if game_orientation == "white" else PieceColor.BLACK
                 self.start_game(game_orientation)
             elif cmd == "exit":
-                self.player.leave_player_directory()
+                self.player.leave_server()
                 break
             else:
                 print("Command not found. Type 'help' for list of commands.")
@@ -63,6 +63,8 @@ class App:
 App()
 
 # TODO
+# do we need to encode as utf-8? How to transfer a simple tuple?
+
 # run/debug player connection with opponent and move exchange
 # run server
 # P1 joins server
@@ -96,4 +98,6 @@ App()
 #   stress test to get optimal threading count
 #   what if player force quits
 #   add user accounts + authentication
-# website project page + github project page (licensing, network diagrams, state machines, markdown with code segments, fix projects page)
+# documentation 
+#   delete project pages, replace projects page with template inpsired from https://eli.thegreenplace.net/
+#   work on github project page, use https://github.com/eliben/luz-cpu as example template
