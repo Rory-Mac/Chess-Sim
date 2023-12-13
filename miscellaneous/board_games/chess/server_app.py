@@ -1,4 +1,5 @@
 import random
+import pickle
 import threading
 from socket import *
 from constants import *
@@ -20,9 +21,14 @@ class ServerApp:
     def __CLI(self):
         while True:
             cmd = input("Enter Command: ")
-            if cmd == "exit":
+            if cmd == "help":
+                print("\thelp : list valid commands")
+                print("\texit : close and exit server")
+            elif cmd == "exit":
                 self.__close_server()
                 break
+            else:
+                print("Unknown Command, type 'help' for list of commands.")
 
     def __start_server(self):
         self.socket.listen()
@@ -40,17 +46,17 @@ class ServerApp:
             data = client_connection.recv(1024)
             if not data:
                 break
-            request_type, payload = data.decode('utf-8')
+            request_type, payload = pickle.loads(data)
             if request_type == RequestType.SET_NAME:
                 if self.players.get(payload, None):
-                    client_connection.send((RequestType.NAME_TAKEN).encode('utf-8'))
+                    client_connection.send(pickle.dumps((RequestType.FAILURE, None)))
                 else:
                     self.__set_username(client_connection, payload)
             elif request_type == RequestType.LEAVE_SERVER:
                 self.__remove_player(client_connection)
                 break
             elif request_type == RequestType.LIST_ALL:
-                self.__list_players(client_connection)
+                client_connection.send(pickle.dumps(self.players.values()))
             elif request_type == RequestType.GAME_REQUEST:
                 self.__game_request(client_connection, payload)
         client_connection.close()
@@ -71,23 +77,21 @@ class ServerApp:
             "active_connection" : client_connection   
         }
 
-    def __list_players(self, client_connection):
-        client_connection.send(self.players.values().encode('utf-8'))
-
     def __game_request(self, client_connection, payload):
         user_from, user_to = payload
         requested_addr = self.players[user_to]["active_connection"]
         requested_conn = self.client_connections[requested_addr]
-        requested_conn.send((RequestType.GAME_REQUEST, (user_from, user_to)).encode('utf-8'))
-        response, payload = requested_conn.recv(1024).decode('utf-8')
-        if response == RequestType.ACCEPT_GAME:
+        requested_conn.send(pickle.dumps((RequestType.GAME_REQUEST, (user_from, user_to))))
+        response = requested_conn.recv(1024)
+        request_type, payload = pickle.loads(response)
+        if request_type == RequestType.ACCEPT_GAME:
             listening_addr = payload
             color_user_from = random.choice([PieceColor.WHITE, PieceColor.BLACK])
             color_user_to = PieceColor.BLACK if color_user_from == PieceColor.WHITE else PieceColor.BLACK
-            client_connection.send((RequestType.INITIALISE_GAME, (listening_addr, color_user_from)))
-            requested_conn.send((RequestType.INITIALISE_GAME, color_user_to))
-        elif response == RequestType.REJECT_GAME:
-            client_connection.send((RequestType.REJECT_GAME).encode('utf-8'))
+            client_connection.send(pickle.dumps((RequestType.INITIALISE_GAME, (listening_addr, color_user_from))))
+            requested_conn.send(pickle.dumps((RequestType.INITIALISE_GAME, (listening_addr, color_user_to))))
+        elif request_type == RequestType.REJECT_GAME:
+            client_connection.send(pickle.dumps((RequestType.REJECT_GAME, None)))
 
     def __close_server(self):
         for conn in self.client_connections:

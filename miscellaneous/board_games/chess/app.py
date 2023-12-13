@@ -8,7 +8,7 @@ from game_board import GameBoard, PieceColor
 #--------------------------------------------------------------------------------------------------------------
 class App:
     def __init__(self):
-        self.player = Player(self)
+        self.player = Player()
         self.__CLI()
 
     def __CLI(self):
@@ -63,7 +63,6 @@ class App:
 App()
 
 # TODO
-# get rid of utf-8 encoding/decoding, use pickle dumps and pickle loads
 # run/debug player connection with opponent and move exchange
 # run server
 # P1 joins server
@@ -92,6 +91,7 @@ App()
 #   pawn promotion, castling, en passant,
 #   make board prettier (gridded-colors light-green/dark-green, custom images, smaller window size)
 # FURTHER FEATURES
+#   replace print statements with event logging
 #   add function docstrings, return/argument types
 #   add custom packet structure (replace strings with bits)
 #   audio

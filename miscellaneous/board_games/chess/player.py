@@ -1,10 +1,10 @@
+import pickle
 from socket import *
 from constants import *
 from threading import Thread
 
 class Player:
-    def __init__(self, application):
-        self.application = application
+    def __init__(self):
         self.game_trigger = None
         self.player_tag = input("Enter username: ")
         self.server_socket = socket(AF_INET, SOCK_STREAM)
@@ -22,25 +22,30 @@ class Player:
 
     def __join_server(self):
         self.server_socket.connect(PLAYER_DIRECTORY_ADDR)
-        self.server_socket.send((RequestType.SET_NAME, self.player_tag).encode('utf-8'))
+        message = (RequestType.SET_NAME, self.player_tag)
+        self.server_socket.send(pickle.dumps(message))
         request_type, _ = self.server_socket.recv(PACKET_MAX_SIZE)
         while request_type != RequestType.SUCCESS:
             self.player_tag = input("Username Taken. Please try again: ")
-            self.server_socket.send((RequestType.SET_NAME, self.player_tag).encode('utf-8'))
+            message = (RequestType.SET_NAME, self.player_tag)
+            self.server_socket.send(pickle.dumps(message))
             request_type, _ = self.server_socket.recv(PACKET_MAX_SIZE)
 
     def leave_server(self):
-        self.server_socket.send((RequestType.LEAVE_SERVER).encode('utf-8'))
+        message = (RequestType.LEAVE_SERVER, None)
+        self.server_socket.send(pickle.dumps(message))
         self.server_socket.close()
 
     def list_players(self):
-        self.server_socket.send((RequestType.LIST_ALL).encode('utf-8'))
+        message = (RequestType.LIST_ALL, None)
+        self.server_socket.send(pickle.dumps(message))
         response = self.server_socket.recv(PACKET_MAX_SIZE)
         print(response)
 
     # returns player's game orientation if request accepted, else returns none
     def game_request(self, opponent_tag):
-        self.server_socket.send((RequestType.GAME_REQUEST, (self.player_tag, opponent_tag)).encode('utf-8'))
+        message = (RequestType.GAME_REQUEST, (self.player_tag, opponent_tag))
+        self.server_socket.send(pickle.dumps(message))
         response_type, payload = self.server_socket.recv(PACKET_MAX_SIZE)
         if response_type == RequestType.INITIALISE_GAME:
             print("Request Accepted. Game initialising...")
@@ -57,8 +62,9 @@ class Player:
     def __listen_for_opponent(self):
         print("listening for opponent...")
         self.opponent_socket.bind(('localhost', 0))
-        # notify server of listening address, start listening 
-        self.server_socket.send((RequestType.ACCEPT_GAME, self.opponent_socket.getpeername()).encode('utf-8')) 
+        # notify server of listening address, start listening
+        message = (RequestType.ACCEPT_GAME, self.opponent_socket.getpeername()) 
+        self.server_socket.send(pickle.dumps(message)) 
         self.opponent_socket.listen()
         # accept inbound opponent connection to start game
         connection, address = self.opponent_socket.accept()
@@ -78,10 +84,11 @@ class Player:
             if request_type == RequestType.GAME_REQUEST:
                 response = input(f"Incoming-request from {user_from}. Type \"Accept\" or \"Reject\": ")
                 if response.lower() == "reject":
-                    self.server_socket.send((RequestType.REJECT_GAME).encode('utf-8'))
+                    self.server_socket.send(pickle.dumps((RequestType.REJECT_GAME, None)))
                 elif response.lower() == "accept":
                     self.__listen_for_opponent()
-                    game_orientation = self.server_socket.recv(PACKET_MAX_SIZE).decode('utf-8')
+                    initialisation = self.server_socket.recv(PACKET_MAX_SIZE)
+                    _, _, game_orientation = pickle.loads(initialisation)
                     self.in_game = game_orientation
                     self.__opponent_handler()
 
@@ -96,7 +103,7 @@ class Player:
 
     def send_move(self, move):
         if self.opponent_connection:
-            self.opponent_connection.send(move.encode('utf-8'))
+            self.opponent_connection.send(pickle.dumps(move))
         else:
-            self.opponent_socket.send(move.encode('utf-8'))
+            self.opponent_socket.send(pickle.dumps(move))
         self.move_history.append(move)
