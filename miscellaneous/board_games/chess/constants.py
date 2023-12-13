@@ -17,13 +17,14 @@ class PlayerStatus(Enum):
     INGAME = 1
 
 class RequestType(Enum):
-    SET_NAME = 0            # payload :: username
-    LIST_ALL = 1            # payload :: None
-    GAME_REQUEST = 2        # payload :: (user_from, user_to)
-    ACCEPT_GAME = 3         # payload :: listening_addr
-    REJECT_GAME = 4         # payload :: None
-    INITIALISE_GAME = 5     # payload :: (listening_addr, color)
-    MOVE = 6                # payload :: (x1,y1), (x2,y2)
-    LEAVE_SERVER = 7        # payload :: None
-    SUCCESS = 8             # payload :: message
-    FAILURE = 9             # payload :: message
+    SET_NAME = 0                    # payload :: username
+    LIST_ALL = 1                    # payload :: none | player_list
+    GAME_REQUEST = 2                # payload :: (user_from, user_to)
+    ACCEPT_GAME = 3                 # payload :: user_from, listening_addr
+    REJECT_GAME = 4                 # payload :: None
+    INITIALISE_REQUESTING = 5       # payload :: (listening_addr, color)
+    INITIALISE_REQUESTED = 6        # payload :: color
+    MOVE = 6                        # payload :: (x1,y1), (x2,y2)
+    LEAVE_SERVER = 7                # payload :: None
+    SUCCESS = 8                     # payload :: message
+    FAILURE = 9                     # payload :: message

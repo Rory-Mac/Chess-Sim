@@ -24,6 +24,8 @@ class ServerApp:
             if cmd == "help":
                 print("\thelp : list valid commands")
                 print("\texit : close and exit server")
+            elif cmd == "list":
+                print(self.players.keys())
             elif cmd == "exit":
                 self.__close_server()
                 break
@@ -52,13 +54,27 @@ class ServerApp:
                     client_connection.send(pickle.dumps((RequestType.FAILURE, None)))
                 else:
                     self.__set_username(client_connection, payload)
+                    client_connection.send(pickle.dumps((RequestType.SUCCESS, None)))
             elif request_type == RequestType.LEAVE_SERVER:
                 self.__remove_player(client_connection)
                 break
             elif request_type == RequestType.LIST_ALL:
-                client_connection.send(pickle.dumps(self.players.values()))
+                message = (RequestType.LIST_ALL, list(self.players.keys()))
+                client_connection.send(pickle.dumps(message))
             elif request_type == RequestType.GAME_REQUEST:
-                self.__game_request(client_connection, payload)
+                self.__game_request(payload)
+            elif request_type == RequestType.ACCEPT_GAME:
+                print("Processing accept game")
+                user_from, listening_addr = payload
+                color_user_from = random.choice([PieceColor.WHITE, PieceColor.BLACK])
+                color_user_to = PieceColor.BLACK if color_user_from == PieceColor.WHITE else PieceColor.BLACK
+                requesting_connection = self.players[user_from]["active_connection"]
+                requesting_connection.send(pickle.dumps((RequestType.INITIALISE_REQUESTING, (listening_addr, color_user_from))))
+                client_connection.send(pickle.dumps((RequestType.INITIALISE_REQUESTED, color_user_to)))
+                print("accept game processed")
+            elif request_type == RequestType.REJECT_GAME:
+                client_connection.send(pickle.dumps((RequestType.REJECT_GAME, None)))
+                print("reject game processed")
         client_connection.close()
 
     def __remove_player(self, client_connection):
@@ -69,29 +85,23 @@ class ServerApp:
         client_connection.close()
 
     def __set_username(self, client_connection, username):
-        old_username = self.active_connections[client_connection]
-        self.active_connections[client_connection] = username
-        self.players.pop(old_username)
+        client_addr = client_connection.getpeername()
+        old_username = self.active_connections[client_addr]
+        self.active_connections[client_addr] = username
+        if self.players.get(old_username, None):
+            self.players.pop(old_username)
         self.players[username] = {
             "status" : PlayerStatus.ONLINE,
-            "active_connection" : client_connection   
+            "active_address" : client_addr,
+            "active_connection" : client_connection
         }
 
-    def __game_request(self, client_connection, payload):
+    def __game_request(self, payload):
+        print("Game request processing")
         user_from, user_to = payload
-        requested_addr = self.players[user_to]["active_connection"]
-        requested_conn = self.client_connections[requested_addr]
+        requested_conn = self.players[user_to]["active_connection"]
         requested_conn.send(pickle.dumps((RequestType.GAME_REQUEST, (user_from, user_to))))
-        response = requested_conn.recv(1024)
-        request_type, payload = pickle.loads(response)
-        if request_type == RequestType.ACCEPT_GAME:
-            listening_addr = payload
-            color_user_from = random.choice([PieceColor.WHITE, PieceColor.BLACK])
-            color_user_to = PieceColor.BLACK if color_user_from == PieceColor.WHITE else PieceColor.BLACK
-            client_connection.send(pickle.dumps((RequestType.INITIALISE_GAME, (listening_addr, color_user_from))))
-            requested_conn.send(pickle.dumps((RequestType.INITIALISE_GAME, (listening_addr, color_user_to))))
-        elif request_type == RequestType.REJECT_GAME:
-            client_connection.send(pickle.dumps((RequestType.REJECT_GAME, None)))
+        print("Game request processed")
 
     def __close_server(self):
         for conn in self.client_connections:

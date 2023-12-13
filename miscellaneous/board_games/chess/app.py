@@ -1,3 +1,4 @@
+import re
 import pygame
 from constants import *
 from player import Player
@@ -13,30 +14,28 @@ class App:
 
     def __CLI(self):
         while True:
-            cmd = input("Input command: ")
-            cmd_words = cmd.split()
-            if cmd_words[0] == "help":
+            user_input = input("Input command: ")
+            if user_input == "": continue
+            cmd_words = user_input.split() if re.search('\s+', user_input) else [user_input]
+            cmd = cmd_words[0]
+            if cmd == "help":
                 print("\thelp : list all commands")
                 print("\tlist : list all available players")
                 print("\trequest [player] : request game with player")
                 print("\texit : exit command-line interface")
-            elif cmd_words[0] == "list":
+            elif cmd == "list":
                 self.player.list_players()
-            elif cmd_words[0] == "request":
-                game_orientation = self.player.game_request(cmd_words[1])
-                if game_orientation == None: continue
-                game_orientation = PieceColor.WHITE if game_orientation == "white" else PieceColor.BLACK
-                self.start_game(game_orientation)
+            elif cmd == "request":
+                self.player.game_request(cmd_words[1])
             elif cmd == "exit":
                 self.player.leave_server()
                 break
             else:
                 print("Command not found. Type 'help' for list of commands.")
             # server interrupt sets player's game_trigger field to game_orientation, signalling main thread to initialise game
-            game_orientation = self.player.get_game_trigger()
-            if game_orientation:
-                self.start_game(game_orientation)
-                self.player.reset_game_trigger()
+            if self.player.game_trigger:
+                self.start_game(self.player.game_trigger)
+                self.player.game_trigger = None
 
     def start_game(self, game_orientation):
         pygame.init()
@@ -64,20 +63,20 @@ App()
 
 # TODO
 # run/debug player connection with opponent and move exchange
-# run server
-# P1 joins server
-# P1 lists players
-# P2 joins server
-# P2 lists players
-# P1 lists players
-# P1 requests game with P2
-# P2 denies
-# P1 requests game with P2
-# P2 accepts
-# P1 makes move
-# P2 receives move
-# P2 makes move
-# P1 receives move
+#   run server                      check
+#   P1 joins server                 check
+#   P1 lists players                check
+#   P2 joins server                 check
+#   P2 lists players                check
+#   P1 lists players                check
+#   P1 requests game with P2
+#   P2 denies
+#   P1 requests game with P2
+#   P2 accepts
+#   P1 makes move
+#   P2 receives move
+#   P2 makes move
+#   P1 receives move
 
 # visualise opponent moves, run/debug
 # GET IT WORKING
