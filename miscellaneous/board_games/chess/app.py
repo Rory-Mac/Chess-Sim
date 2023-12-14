@@ -65,14 +65,16 @@ class App:
 App()
 # TODO
 # GET IT WORKING
-#   check, checkmate, and game exit
-#       when player makes a move, if own king is in check, move is cancelled
-#           when player makes a move, king is unhighlighted
-#       when opponent makes a move, if own king is in check, king highlighted red, if own king is in checkmate, termination signal sent
+#   check
+#       when player makes a move, if move is valid, make move, but if move puts king in check, cancel move
+#       when player makes a move, king is unhighlighted
+#       when opponent makes a move, if own king is in check, king highlighted red
 #   initial pawn movement of 2 spaces can jump over pieces
 #   pawn promotion, castling, en passant,
 #   make board prettier (gridded-colors light-green/dark-green, custom images, smaller window size)
+#   checkmate and game exit
 # FURTHER FEATURES
+#   pen tablet + graphicsgale + xmas theme
 #   shell scripts for testing
 #   replace print statements with event logging
 #   add function docstrings, return/argument types
@@ -81,7 +83,6 @@ App()
 #   stress test to get optimal threading count
 #   what if player force quits
 #   add user accounts + authentication
-#   xmas theme
 # documentation 
 #   delete project pages, replace projects page with template inpsired from https://eli.thegreenplace.net/
 #   work on github project page, use https://github.com/eliben/luz-cpu as example template
