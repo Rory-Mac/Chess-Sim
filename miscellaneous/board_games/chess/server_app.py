@@ -67,13 +67,18 @@ class ServerApp:
                 print("Processing accept game")
                 user_from, listening_addr = payload
                 color_user_from = random.choice([PieceColor.WHITE, PieceColor.BLACK])
-                color_user_to = PieceColor.BLACK if color_user_from == PieceColor.WHITE else PieceColor.BLACK
+                color_user_to = PieceColor.BLACK if color_user_from == PieceColor.WHITE else PieceColor.WHITE
                 requesting_connection = self.players[user_from]["active_connection"]
                 requesting_connection.send(pickle.dumps((RequestType.INITIALISE_REQUESTING, (listening_addr, color_user_from))))
                 client_connection.send(pickle.dumps((RequestType.INITIALISE_REQUESTED, color_user_to)))
                 print("accept game processed")
             elif request_type == RequestType.REJECT_GAME:
-                client_connection.send(pickle.dumps((RequestType.REJECT_GAME, None)))
+                print("IS IT EVEN HERE?")
+                user_from, _ = payload
+                print("reject game payload processed")
+                requesting_connection = self.players[user_from]["active_connection"]
+                print(requesting_connection)
+                requesting_connection.send(pickle.dumps((RequestType.REJECT_GAME, payload)))
                 print("reject game processed")
         client_connection.close()
 
@@ -97,11 +102,9 @@ class ServerApp:
         }
 
     def __game_request(self, payload):
-        print("Game request processing")
         user_from, user_to = payload
         requested_conn = self.players[user_to]["active_connection"]
         requested_conn.send(pickle.dumps((RequestType.GAME_REQUEST, (user_from, user_to))))
-        print("Game request processed")
 
     def __close_server(self):
         for conn in self.client_connections:
