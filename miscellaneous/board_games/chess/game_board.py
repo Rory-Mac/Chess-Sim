@@ -145,3 +145,60 @@ class GameBoard:
         self.turn = PieceColor.BLACK if self.turn == PieceColor.WHITE else PieceColor.WHITE
         print(f"opponent made move turn is now {self.turn}")
         
+    def inCheck(self):
+        x, y = self.king.x, self.king.y
+        # determine if king is checked by adjacent king
+        if abs(x - self.opponent_king.x) < 2 and abs(y - self.opponent_king.y) < 2:
+            return True
+        # determine if king is checked by adjacent knight
+        positions = [(x - 2, y - 1), (x - 2, y + 1), (x - 1, y + 2), (x - 1, y - 2), (x + 1, y + 2), (x + 1, y - 2)]
+        for position in positions:
+            piece = self.get_piece(position)
+            if piece and isinstance(piece, Knight) and piece.getColor() != self.orientation:
+                return True
+        # determine if king is checked by adjacent pawns
+        positions = [(x - 1, y - 1), (x + 1, y - 1)]
+        for position in positions:
+            piece = self.get_piece(position)
+            if piece and isinstance(piece, Pawn) and piece.getColor() != self.orientation:
+                return True
+        # determine if king is checked vertically or horizontally by rook or queen
+        left, right, up, down = (x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)
+        left_piece = right_piece = up_piece = down_piece = None
+        while left_piece == None and left[0] >= 0:
+            left_piece = self.get_piece(left)
+            left[0] -= 1
+        while right_piece == None and right[0] <= 7:
+            right_piece = self.get_piece(right)
+            right[0] += 1
+        while up_piece == None and up[1] >= 0:
+            up_piece = self.get_piece(up)
+            up[1] -= 1
+        while down_piece == None and down[1] <= 7:
+            down_piece = self.get_piece(down)
+            down[1] += 1
+        type_list = [type(piece) for piece in [left_piece, right_piece, up_piece, down_piece] if piece.getColor() != self.orientation]
+        if Rook in type_list or Queen in type_list:
+            return True
+        # determine if king is checked diagonally by bishop or queen
+        left_up, right_up, left_down, right_down = (x - 1, y - 1), (x + 1, y - 1), (x - 1, y + 1), (x + 1, y + 1)
+        left_up_piece = right_up_piece = left_down_piece = right_down_piece = None
+        while left_up_piece == None and left_up[0] >= 0 and left_up[1] >= 0:
+            left_piece = self.get_piece(left_up)
+            left_up[0] -= 1
+            left_up[1] -= 1
+        while right_up_piece == None and right_up[0] <= 7 and right_up[1] >= 0 :
+            right_piece = self.get_piece(right_up)
+            right_up[0] += 1
+            right_up[1] -= 1
+        while left_down_piece == None and left_down[0] >= 0 and left_down[1] <= 7:
+            left_down_piece = self.get_piece(left_down)
+            left_down[0] -= 1
+            left_down[1] += 1
+        while right_down_piece == None and right_down[0] <= 7 and right_down[1] <= 7:
+            right_down_piece = self.get_piece(right_down)
+            right_down[0] += 1
+            right_down[1] += 1
+        type_list = [type(piece) for piece in [left_up_piece, right_up_piece, left_down_piece, right_down_piece] if piece.getColor() != self.orientation]
+        if Bishop in type_list or Queen in type_list:
+            return True
