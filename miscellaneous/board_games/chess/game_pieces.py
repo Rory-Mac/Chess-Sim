@@ -128,8 +128,8 @@ class Pawn(ChessPiece):
         # if moving diagonally one space to capture
         if abs(dx) == 1 and dy == 1 and target_piece:
             return True
-        # if moving forward one space to capture
-        if dx == 0 and dy == 1:
+        # if moving forward one space
+        if dx == 0 and dy == 1 and not board.get_piece((self.x, self.y - 1)):
             return True
         # if moving forward two spaces on first move
         if dx == 0 and dy == 2 and not board.get_piece((self.x, self.y - 1)):

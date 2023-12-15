@@ -65,10 +65,10 @@ class App:
 App()
 # TODO
 # GET IT WORKING
-#   initial 2-space pawn movement can jump over pieces, pawn promotion, castling, en passant
-#   checkmate algo + game exit
+#   debug castling
+#   checkmate algo/game exit
 #   blue board + better images
-# FURTHER FEATURES
+# REFACTOR
 #   add event logging + shell scripts for testing
 #   add function docstrings, return/argument types
 # DOCUMENT

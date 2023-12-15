@@ -114,7 +114,7 @@ class GameBoard:
             selected_piece.move_count += 1
         if not move_valid: return False
         # if move places king in check, cancel move
-        in_check = self.inCheck()
+        in_check = self.in_danger(self.king)
         if in_check:
             self.board[from_coord[1]][from_coord[0]] = selected_piece
             self.board[to_coord[1]][to_coord[0]] = captured_piece
@@ -135,11 +135,20 @@ class GameBoard:
         if self.selected_tile == clicked_tile and self.selected_tile not in self.player_prev_move: # unselect tile
             self.draw_tile(screen, self.selected_tile)
             self.selected_tile = None
-        elif clicked_piece and clicked_piece.getColor() == self.orientation: # select tile (own piece)
+        elif self.selected_tile and clicked_piece and clicked_piece.getColor() == self.orientation: # select tile (own piece)
+            # check for special case where player selects king and then castles
+            selected_piece = self.get_piece(self.selected_tile)
+            if isinstance(selected_piece, King) and isinstance(clicked_piece, Rook):
+                self.castle_if_valid(clicked_piece)
+            # unhighlight previously selected tile, highlight newly selected tile
             if self.selected_tile and self.selected_tile not in self.player_prev_move: self.draw_tile(screen, self.selected_tile)
             self.selected_tile = clicked_tile
             self.draw_tile(screen, clicked_tile, highlight=True)
         elif self.selected_tile and self.turn == self.orientation and self.makeMove(self.selected_tile, clicked_tile): # select a move
+            # check for special case of pawn promotion
+            selected_piece = self.board[clicked_tile[1]][clicked_tile[0]]
+            if isinstance(selected_piece, Pawn) and selected_piece.y == 0:
+                self.board[selected_piece.y][selected_piece.x] = Queen(selected_piece.x, selected_piece.y, self.orientation)
             # play sound to user
             winsound.PlaySound(os.getcwd() + '\\assets\player_move.wav', winsound.SND_FILENAME)
             # highlight player move
@@ -158,11 +167,15 @@ class GameBoard:
         return None
     
     def process_opponent_move(self, screen, move : ((int, int), (int, int))):
-        # play sound to user
-        winsound.PlaySound(os.getcwd() + '\\assets\opponent_move.wav', winsound.SND_FILENAME)
         # process received opponent move
         from_coord, to_coord = move
         self.makeOpponentMove(from_coord, to_coord)
+        # check for special case of pawn promotion
+        selected_piece = self.board[to_coord[1]][to_coord[0]]
+        if isinstance(selected_piece, Pawn) and selected_piece.y == 7: 
+            self.board[selected_piece.y][selected_piece.x] = Queen(selected_piece.x, selected_piece.y, self.turn)
+        # play sound to user
+        winsound.PlaySound(os.getcwd() + '\\assets\opponent_move.wav', winsound.SND_FILENAME)
         # highlight opponent move
         self.draw_tile(screen, from_coord, highlight=True)
         self.draw_tile(screen, to_coord, highlight=True)
@@ -174,24 +187,24 @@ class GameBoard:
         self.player_prev_move = ((-1,-1),(-1,-1))
         self.turn = PieceColor.BLACK if self.turn == PieceColor.WHITE else PieceColor.WHITE
 
-    def inCheck(self):
-        x, y = self.king.x, self.king.y
-        # determine if king is checked by adjacent king
+    def in_danger(self, piece):
+        x, y = piece.x, piece.y
+        # determine if piece is endangered by adjacent king
         if abs(x - self.opponent_king.x) < 2 and abs(y - self.opponent_king.y) < 2:
             return True
-        # determine if king is checked by adjacent knight
+        # determine if piece is endangered by adjacent knight
         positions = [(x - 2, y - 1), (x - 2, y + 1), (x - 1, y + 2), (x - 1, y - 2), (x + 1, y + 2), (x + 1, y - 2)]
         for position in positions:
             piece = self.get_piece(position)
             if piece and isinstance(piece, Knight) and piece.getColor() != self.orientation:
                 return True
-        # determine if king is checked by adjacent pawns
+        # determine if piece is endangered by adjacent pawns
         positions = [(x - 1, y - 1), (x + 1, y - 1)]
         for position in positions:
             piece = self.get_piece(position)
             if piece and isinstance(piece, Pawn) and piece.getColor() != self.orientation:
                 return True
-        # determine if king is checked vertically or horizontally by rook or queen
+        # determine if piece is endangered vertically or horizontally by rook or queen
         left, right, up, down = [x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]
         left_piece = right_piece = up_piece = down_piece = None
         while left_piece == None and left[0] >= 0:
@@ -210,7 +223,7 @@ class GameBoard:
                      if piece and piece.getColor() != self.orientation]
         if Rook in type_list or Queen in type_list:
             return True
-        # determine if king is checked diagonally by bishop or queen
+        # determine if piece is endangered diagonally by bishop or queen
         left_up, right_up, left_down, right_down = [x - 1, y - 1], [x + 1, y - 1], [x - 1, y + 1], [x + 1, y + 1]
         left_up_piece = right_up_piece = left_down_piece = right_down_piece = None
         while left_up_piece == None and left_up[0] >= 0 and left_up[1] >= 0:
@@ -234,3 +247,40 @@ class GameBoard:
         if Bishop in type_list or Queen in type_list:
             return True
         return False
+    
+    def castle_if_valid(self, rook):
+        if not (self.king.move_count == 0 and rook.move_count == 0): 
+            return
+        positions = []
+        if rook.x < self.king.x:
+            for i in range(rook.x + 1, self.king.x):
+                positions.append((i, 7))
+        elif rook.x > self.king.x:
+            for i in range(self.king.x + 1, rook.x):
+                positions.append((i, 7))
+        # check that each position is empty and not being attacked by an opponent piece
+        for position in positions:
+            if self.get_piece(position) or self.in_danger(position):
+                return
+        # otherwise, castling is valid, move castle adjacent to king, hop king over castle
+        self.board[rook.y][rook.x] = None
+        self.board[7][self.king.x] = None
+        if rook.x < self.king.x:
+            self.board[7][self.king.x - 1] = rook
+            rook.x = self.king.x - 1
+            self.board[7][self.king.x - 2] = self.king
+            self.king.x -= 2
+            # draw over previous king and rook positions
+            self.draw_tile((0, 7))
+            self.draw_tile((self.king.x + 2, 7))
+        elif rook.x > self.king.x:
+            self.board[7][self.king.x + 1] = rook
+            rook.x = self.king.x + 1
+            self.board[7][self.king.x + 2] = self.king
+            self.king.x += 2
+            # draw over previous king and rook positions
+            self.draw_tile((7, 7))
+            self.draw_tile((self.king.x - 2, 7))
+        # draw new positions of king and rook
+        self.draw_tile((rook.x, rook.y))
+        self.draw_tile((self.king.x, self.king.y))
