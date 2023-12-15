@@ -43,7 +43,7 @@ class App:
         pygame.init()
         clock = pygame.time.Clock()
         board = GameBoard(game_orientation)
-        screen = pygame.display.set_mode((800, 800))
+        screen = pygame.display.set_mode((45*8, 45*8))
         pygame.display.set_caption(self.player.player_tag)
         board.draw(screen)
         running = True
@@ -65,11 +65,9 @@ class App:
 App()
 # TODO
 # GET IT WORKING
-#   style changes (blue color scheme, 45x45 images, modify window size)
-#   take a break do advent of code
-#   
 #   initial 2-space pawn movement can jump over pieces, pawn promotion, castling, en passant
 #   checkmate and game exit
+#   style changes
 # FURTHER FEATURES
 #   add event logging + shell scripts for testing
 #   add function docstrings, return/argument types

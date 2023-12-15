@@ -33,20 +33,20 @@ class GameBoard:
                 self.opponent_king = self.get_piece((3,0))
         self.game_assets = {
             PieceColor.BLACK : {
-                King : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/king_black.png'), (100, 100)),
-                Queen : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/queen_black.png'), (100, 100)),
-                Rook : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/rook_black.png'), (100, 100)),
-                Bishop : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/bishop_black.png'), (100, 100)),
-                Knight : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/knight_black.png'), (100, 100)),
-                Pawn : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/pawn_black.png'), (100, 100))
+                King : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/king_black.svg'), (45, 45)),
+                Queen : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/queen_black.svg'), (45, 45)),
+                Rook : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/rook_black.svg'), (45, 45)),
+                Bishop : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/bishop_black.svg'), (45, 45)),
+                Knight : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/knight_black.svg'), (45, 45)),
+                Pawn : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/pawn_black.svg'), (45, 45))
             },
             PieceColor.WHITE : {
-                King : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/king_white.png'), (100, 100)),
-                Queen : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/queen_white.png'), (100, 100)),
-                Rook : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/rook_white.png'), (100, 100)),
-                Bishop : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/bishop_white.png'), (100, 100)),
-                Knight : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/knight_white.png'), (100, 100)),
-                Pawn : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/pawn_white.png'), (100, 100))
+                King : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/king_white.svg'), (45, 45)),
+                Queen : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/queen_white.svg'), (45, 45)),
+                Rook : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/rook_white.svg'), (45, 45)),
+                Bishop : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/bishop_white.svg'), (45, 45)),
+                Knight : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/knight_white.svg'), (45, 45)),
+                Pawn : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/pawn_white.svg'), (45, 45))
             }
         }
 
@@ -61,33 +61,33 @@ class GameBoard:
         # draw overlayed board
         for x in range(8):
             for y in range(8):
-                pygame.draw.rect(screen, self.get_tile_color((x,y)), pygame.Rect(100*x, 100*y, 100, 100))
+                pygame.draw.rect(screen, self.get_tile_color((x,y)), pygame.Rect(45*x, 45*y, 45, 45))
         # draw pieces to screen
         white_oriented_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
         black_oriented_order = [Rook, Knight, Bishop, King, Queen, Bishop, Knight, Rook]
         if self.orientation == PieceColor.WHITE:
             for i, piece in enumerate(white_oriented_order):
-                screen.blit(self.game_assets[PieceColor.BLACK][piece], (i*100, 0))
-                screen.blit(self.game_assets[PieceColor.BLACK][Pawn], (i*100, 100))
-                screen.blit(self.game_assets[PieceColor.WHITE][Pawn], (i*100, 600))
-                screen.blit(self.game_assets[PieceColor.WHITE][piece], (i*100, 700))
+                screen.blit(self.game_assets[PieceColor.BLACK][piece], (i*45, 0))
+                screen.blit(self.game_assets[PieceColor.BLACK][Pawn], (i*45, 45))
+                screen.blit(self.game_assets[PieceColor.WHITE][Pawn], (i*45, 6*45))
+                screen.blit(self.game_assets[PieceColor.WHITE][piece], (i*45, 7*45))
         elif self.orientation == PieceColor.BLACK:
             for i, piece in enumerate(black_oriented_order):
-                screen.blit(self.game_assets[PieceColor.WHITE][piece], (i*100, 0))
-                screen.blit(self.game_assets[PieceColor.WHITE][Pawn], (i*100, 100))
-                screen.blit(self.game_assets[PieceColor.BLACK][Pawn], (i*100, 600))
-                screen.blit(self.game_assets[PieceColor.BLACK][piece], (i*100, 700))
+                screen.blit(self.game_assets[PieceColor.WHITE][piece], (i*45, 0))
+                screen.blit(self.game_assets[PieceColor.WHITE][Pawn], (i*45, 45))
+                screen.blit(self.game_assets[PieceColor.BLACK][Pawn], (i*45, 6*45))
+                screen.blit(self.game_assets[PieceColor.BLACK][piece], (i*45, 7*45))
 
     def draw_tile(self, screen, tile : (int, int), highlight=False):
         x, y = tile
         tile_color = self.get_tile_color(tile)
         if highlight:
             tile_color = HIGHLIGHTED_DARK_TILE if tile_color == DARK_TILE else HIGHLIGHTED_LIGHT_TILE
-        pygame.draw.rect(screen, tile_color, pygame.Rect(100*x, 100*y, 100, 100))
+        pygame.draw.rect(screen, tile_color, pygame.Rect(45*x, 45*y, 45, 45))
         piece = self.get_piece(tile)
         if piece:
             sprite = self.game_assets[piece.getColor()][piece.__class__]
-            screen.blit(sprite, (100*x,100*y))
+            screen.blit(sprite, (45*x,45*y))
 
     def __add_piece(self, piece : ChessPiece):
         x, y = piece.getX(), piece.getY()
@@ -128,7 +128,7 @@ class GameBoard:
 
     # if click event triggers a move on player's turn, return that move, else return none
     def process_click_event(self, screen, click_coord : (int, int)):
-        clicked_tile = (click_coord[0] // 100, click_coord[1] // 100)
+        clicked_tile = (click_coord[0] // 45, click_coord[1] // 45)
         clicked_piece = self.get_piece(clicked_tile)
         if self.selected_tile == clicked_tile and self.selected_tile not in self.player_prev_move: # unselect tile
             self.draw_tile(screen, self.selected_tile)
