@@ -121,19 +121,23 @@ class Bishop(ChessPiece):
         return (dx == dy) and (dx != 0 or dy != 0)
 
 class Pawn(ChessPiece):
-    def isValid(self, board, to_coord : (int, int)) -> bool:
-        target_piece = board.get_piece(to_coord)
-        same_column = self.x == to_coord[0]
-        # move is valid if moving forward one tile to empty tile, moving forward two tiles if pawn's first move, 
-        # or one tile diagonally to take opponent's piece 
-        return (not target_piece and same_column and self.y - to_coord[1] == 1) or \
-        (not target_piece and same_column and self.move_count == 0 and self.y - to_coord[1] == 2) or \
-        (target_piece and abs(self.x - to_coord[0]) == 1)
+    def isValid(self, board, coord : (int, int)) -> bool:
+        dx = coord[0] - self.x
+        dy = self.y - coord[1]
+        target_piece = board.get_piece(coord)
+        # if moving diagonally one space to capture
+        if abs(dx) == 1 and dy == 1 and target_piece:
+            return True
+        # if moving forward one space to capture
+        if dx == 0 and dy == 1:
+            return True
+        # if moving forward two spaces on first move
+        if dx == 0 and dy == 2 and not board.get_piece((self.x, self.y - 1)):
+            return True
+        return False
 
     def isInRange(self, coord : (int, int)) -> bool:
-        dx = abs(self.x - coord[0])
-        return (dx <= 1 and self.y - coord[1] == 1) or (dx == 0 and self.y - coord[1] == 2)
+        return True
 
     def isBlocked(self, board, coord : (int, int)) -> bool:
         return False
-    

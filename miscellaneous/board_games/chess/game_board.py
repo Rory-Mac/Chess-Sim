@@ -1,7 +1,9 @@
 import os
 import pygame
+import winsound
 from game_pieces import *
 from constants import *
+
 
 class GameBoard:
     def __init__(self, orientation):
@@ -138,6 +140,8 @@ class GameBoard:
             self.selected_tile = clicked_tile
             self.draw_tile(screen, clicked_tile, highlight=True)
         elif self.selected_tile and self.turn == self.orientation and self.makeMove(self.selected_tile, clicked_tile): # select a move
+            # play sound to user
+            winsound.PlaySound(os.getcwd() + '\\assets\player_move.wav', winsound.SND_FILENAME)
             # highlight player move
             self.draw_tile(screen, self.selected_tile, highlight=True)
             self.draw_tile(screen, clicked_tile, highlight=True)
@@ -154,6 +158,8 @@ class GameBoard:
         return None
     
     def process_opponent_move(self, screen, move : ((int, int), (int, int))):
+        # play sound to user
+        winsound.PlaySound(os.getcwd() + '\\assets\opponent_move.wav', winsound.SND_FILENAME)
         # process received opponent move
         from_coord, to_coord = move
         self.makeOpponentMove(from_coord, to_coord)

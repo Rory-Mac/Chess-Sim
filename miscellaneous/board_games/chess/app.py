@@ -66,14 +66,11 @@ App()
 # TODO
 # GET IT WORKING
 #   initial 2-space pawn movement can jump over pieces, pawn promotion, castling, en passant
-#   checkmate and game exit
-#   style changes
+#   checkmate algo + game exit
+#   blue board + better images
 # FURTHER FEATURES
 #   add event logging + shell scripts for testing
 #   add function docstrings, return/argument types
-#   stress test to get optimal threading count
-#   audio (for piece movement, check, checkmate)
-#   pen tablet + graphicsgale + xmas theme
-# documentation
-#   delete project pages, replace projects page with template inpsired from https://eli.thegreenplace.net/
-#   work on github project page, use https://github.com/eliben/luz-cpu as example template
+# DOCUMENT
+#   delete project pages, replace projects page with template inspired from https://eli.thegreenplace.net/
+#   create github page for chess project, use https://github.com/eliben/luz-cpu as example template
