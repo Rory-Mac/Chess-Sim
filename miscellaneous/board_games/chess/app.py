@@ -65,26 +65,17 @@ class App:
 App()
 # TODO
 # GET IT WORKING
-#   prettier board, refactor highlighting, change color scheme
-#   show where piece has moved from/to
-#   check
-#       when player makes a move, if move is valid, make move, but if move puts king in check, cancel move
-#       when player makes a move, king is unhighlighted
-#       when opponent makes a move, if own king is in check, king highlighted red
-#   initial pawn movement of 2 spaces can jump over pieces
-#   pawn promotion, castling, en passant,
-#   make board prettier (gridded-colors light-green/dark-green, custom images, smaller window size)
+#   style changes (blue color scheme, 45x45 images, modify window size)
+#   take a break do advent of code
+#   
+#   initial 2-space pawn movement can jump over pieces, pawn promotion, castling, en passant
 #   checkmate and game exit
 # FURTHER FEATURES
-#   pen tablet + graphicsgale + xmas theme
-#   shell scripts for testing
-#   replace print statements with event logging
+#   add event logging + shell scripts for testing
 #   add function docstrings, return/argument types
-#   add custom packet structure (replace strings with bits)
-#   audio
 #   stress test to get optimal threading count
-#   what if player force quits
-#   add user accounts + authentication
-# documentation 
+#   audio (for piece movement, check, checkmate)
+#   pen tablet + graphicsgale + xmas theme
+# documentation
 #   delete project pages, replace projects page with template inpsired from https://eli.thegreenplace.net/
 #   work on github project page, use https://github.com/eliben/luz-cpu as example template

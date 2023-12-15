@@ -7,8 +7,8 @@ class GameBoard:
     def __init__(self, orientation):
         self.board = [[None for _ in range(8)] for _ in range(8)]
         self.selected_tile = None
-        self.player_prev_move = ((0,0),(0,0)) # dummy initialisation
-        self.opponent_prev_move = ((0,0),(0,0)) # dummy initialisation
+        self.player_prev_move = ((-1,-1),(-1,-1)) # dummy initialisation
+        self.opponent_prev_move = ((-1,-1),(-1,-1)) # dummy initialisation
         self.orientation = orientation
         white_oriented_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
         black_oriented_order = [Rook, Knight, Bishop, King, Queen, Bishop, Knight, Rook]
@@ -95,19 +95,30 @@ class GameBoard:
             raise LookupError("Piece already exists at provided tile.")
         self.board[y][x] = piece
 
-    def get_piece(self, tile : (int, int)) -> ChessPiece:
-        return self.board[tile[1]][tile[0]]
+    def get_piece(self, tile) -> ChessPiece:
+        if 0 <= tile[0] <= 7 and 0 <= tile[1] <= 7:
+            return self.board[tile[1]][tile[0]]
+        return None
 
     # returns false if move invalid else returns true
     def makeMove(self, from_coord : (int, int), to_coord : (int, int)) -> bool:
         selected_piece = self.board[from_coord[1]][from_coord[0]]
-        valid = selected_piece.isMoveValid(self, to_coord)
-        if valid:
+        captured_piece = self.board[to_coord[1]][to_coord[0]]
+        move_valid = selected_piece.isMoveValid(self, to_coord)
+        if move_valid:
             self.board[to_coord[1]][to_coord[0]] = selected_piece
             selected_piece.x, selected_piece.y = to_coord[0], to_coord[1]
             self.board[from_coord[1]][from_coord[0]] = None
             selected_piece.move_count += 1
-        return valid
+        if not move_valid: return False
+        # if move places king in check, cancel move
+        in_check = self.inCheck()
+        if in_check:
+            self.board[from_coord[1]][from_coord[0]] = selected_piece
+            self.board[to_coord[1]][to_coord[0]] = captured_piece
+            selected_piece.x, selected_piece.y = from_coord[0], from_coord[1]
+            selected_piece.move_count -= 1
+        return not in_check
 
     def makeOpponentMove(self, from_coord : (int, int), to_coord : (int, int)) -> bool:
         selected_piece = self.board[from_coord[1]][from_coord[0]]
@@ -135,6 +146,7 @@ class GameBoard:
             self.draw_tile(screen, self.opponent_prev_move[1])
             # turn-over, return player move
             self.player_prev_move = (self.selected_tile, clicked_tile)
+            self.opponent_prev_move = ((-1,-1),(-1,-1))
             self.turn = PieceColor.BLACK if self.turn == PieceColor.WHITE else PieceColor.WHITE
             move = (self.selected_tile, clicked_tile)
             self.selected_tile = None
@@ -153,6 +165,7 @@ class GameBoard:
         self.draw_tile(screen, self.player_prev_move[1])
         # turn-over
         self.opponent_prev_move = (from_coord, to_coord)
+        self.player_prev_move = ((-1,-1),(-1,-1))
         self.turn = PieceColor.BLACK if self.turn == PieceColor.WHITE else PieceColor.WHITE
 
     def inCheck(self):
@@ -173,7 +186,7 @@ class GameBoard:
             if piece and isinstance(piece, Pawn) and piece.getColor() != self.orientation:
                 return True
         # determine if king is checked vertically or horizontally by rook or queen
-        left, right, up, down = (x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)
+        left, right, up, down = [x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]
         left_piece = right_piece = up_piece = down_piece = None
         while left_piece == None and left[0] >= 0:
             left_piece = self.get_piece(left)
@@ -187,18 +200,19 @@ class GameBoard:
         while down_piece == None and down[1] <= 7:
             down_piece = self.get_piece(down)
             down[1] += 1
-        type_list = [type(piece) for piece in [left_piece, right_piece, up_piece, down_piece] if piece.getColor() != self.orientation]
+        type_list = [type(piece) for piece in [left_piece, right_piece, up_piece, down_piece] \
+                     if piece and piece.getColor() != self.orientation]
         if Rook in type_list or Queen in type_list:
             return True
         # determine if king is checked diagonally by bishop or queen
-        left_up, right_up, left_down, right_down = (x - 1, y - 1), (x + 1, y - 1), (x - 1, y + 1), (x + 1, y + 1)
+        left_up, right_up, left_down, right_down = [x - 1, y - 1], [x + 1, y - 1], [x - 1, y + 1], [x + 1, y + 1]
         left_up_piece = right_up_piece = left_down_piece = right_down_piece = None
         while left_up_piece == None and left_up[0] >= 0 and left_up[1] >= 0:
-            left_piece = self.get_piece(left_up)
+            left_up_piece = self.get_piece(left_up)
             left_up[0] -= 1
             left_up[1] -= 1
         while right_up_piece == None and right_up[0] <= 7 and right_up[1] >= 0 :
-            right_piece = self.get_piece(right_up)
+            right_up_piece = self.get_piece(right_up)
             right_up[0] += 1
             right_up[1] -= 1
         while left_down_piece == None and left_down[0] >= 0 and left_down[1] <= 7:
@@ -209,6 +223,8 @@ class GameBoard:
             right_down_piece = self.get_piece(right_down)
             right_down[0] += 1
             right_down[1] += 1
-        type_list = [type(piece) for piece in [left_up_piece, right_up_piece, left_down_piece, right_down_piece] if piece.getColor() != self.orientation]
+        type_list = [type(piece) for piece in [left_up_piece, right_up_piece, left_down_piece, right_down_piece] \
+                     if piece and piece.getColor() != self.orientation]
         if Bishop in type_list or Queen in type_list:
             return True
+        return False
