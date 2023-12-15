@@ -25,7 +25,7 @@ def convert(word):
         if word[1] == "i":
             return "6"
 
-fd = open('day_one_input.txt', 'r')
+fd = open('d1_input.txt', 'r')
 sum = 0
 for line in fd:
     first = None

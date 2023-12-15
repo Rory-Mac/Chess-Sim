@@ -1,4 +1,4 @@
-fd = open('day_one_input.txt', 'r')
+fd = open('d1_input.txt', 'r')
 num_strs = {}
 for i in range(10):
     num_strs[str(i)] = str(i)
