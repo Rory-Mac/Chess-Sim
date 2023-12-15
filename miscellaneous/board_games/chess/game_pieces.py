@@ -18,9 +18,6 @@ class ChessPiece:
         return self.color
 
     def isMoveValid(self, board, to_coord : (int, int)) -> bool:
-        print(self.isValid(board, to_coord))
-        print(self.isInRange(to_coord))
-        print(self.isBlocked(board, to_coord))
         return self.isValid(board, to_coord) and self.isInRange(to_coord) and not self.isBlocked(board, to_coord)
 
     # default method, overriden by class Pawn

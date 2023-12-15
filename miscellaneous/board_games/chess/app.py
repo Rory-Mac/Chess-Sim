@@ -65,6 +65,8 @@ class App:
 App()
 # TODO
 # GET IT WORKING
+#   prettier board, refactor highlighting, change color scheme
+#   show where piece has moved from/to
 #   check
 #       when player makes a move, if move is valid, make move, but if move puts king in check, cancel move
 #       when player makes a move, king is unhighlighted

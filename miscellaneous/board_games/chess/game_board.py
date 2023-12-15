@@ -7,6 +7,8 @@ class GameBoard:
     def __init__(self, orientation):
         self.board = [[None for _ in range(8)] for _ in range(8)]
         self.selected_tile = None
+        self.player_prev_move = ((0,0),(0,0)) # dummy initialisation
+        self.opponent_prev_move = ((0,0),(0,0)) # dummy initialisation
         self.orientation = orientation
         white_oriented_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
         black_oriented_order = [Rook, Knight, Bishop, King, Queen, Bishop, Knight, Rook]
@@ -48,12 +50,18 @@ class GameBoard:
             }
         }
 
+    def get_tile_color(self, tile : (int, int)):
+        x, y = tile
+        if (x % 2 == 0 and y % 2 == 0) or (x % 2 == 1 and y % 2 == 1):
+            return LIGHT_TILE
+        if (x % 2 == 1 and y % 2 == 0) or (x % 2 == 0 and y % 2 == 1):
+            return DARK_TILE
+
     def draw(self, screen):
         # draw overlayed board
-        screen.fill(BLACK)
         for x in range(8):
             for y in range(8):
-                pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
+                pygame.draw.rect(screen, self.get_tile_color((x,y)), pygame.Rect(100*x, 100*y, 100, 100))
         # draw pieces to screen
         white_oriented_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
         black_oriented_order = [Rook, Knight, Bishop, King, Queen, Bishop, Knight, Rook]
@@ -70,25 +78,16 @@ class GameBoard:
                 screen.blit(self.game_assets[PieceColor.BLACK][Pawn], (i*100, 600))
                 screen.blit(self.game_assets[PieceColor.BLACK][piece], (i*100, 700))
 
-    def draw_tile(self, screen, tile : (int, int)):
+    def draw_tile(self, screen, tile : (int, int), highlight=False):
         x, y = tile
-        pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
+        tile_color = self.get_tile_color(tile)
+        if highlight:
+            tile_color = HIGHLIGHTED_DARK_TILE if tile_color == DARK_TILE else HIGHLIGHTED_LIGHT_TILE
+        pygame.draw.rect(screen, tile_color, pygame.Rect(100*x, 100*y, 100, 100))
         piece = self.get_piece(tile)
         if piece:
             sprite = self.game_assets[piece.getColor()][piece.__class__]
             screen.blit(sprite, (100*x,100*y))
-
-    def highlight_tile(self, screen, tile : (int, int)):
-        x, y = tile
-        pygame.draw.rect(screen, GREEN, pygame.Rect(100*x, 100*y, 100, 100))
-        pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
-        self.draw_tile(screen, tile)
-
-    def unhighlight_tile(self, screen, tile : (int, int)):
-        x, y = tile
-        pygame.draw.rect(screen, BLACK, pygame.Rect(100*x, 100*y, 100, 100))
-        pygame.draw.rect(screen, WHITE, pygame.Rect(100*x + 5, 100*y + 5, 90, 90))
-        self.draw_tile(screen, tile)
 
     def __add_piece(self, piece : ChessPiece):
         x, y = piece.getX(), piece.getY()
@@ -120,31 +119,42 @@ class GameBoard:
     def process_click_event(self, screen, click_coord : (int, int)):
         clicked_tile = (click_coord[0] // 100, click_coord[1] // 100)
         clicked_piece = self.get_piece(clicked_tile)
-        if self.selected_tile == clicked_tile: # unselect tile
-            self.unhighlight_tile(screen, self.selected_tile)
+        if self.selected_tile == clicked_tile and self.selected_tile not in self.player_prev_move: # unselect tile
+            self.draw_tile(screen, self.selected_tile)
             self.selected_tile = None
         elif clicked_piece and clicked_piece.getColor() == self.orientation: # select tile (own piece)
-            if self.selected_tile: self.unhighlight_tile(screen, self.selected_tile)
+            if self.selected_tile and self.selected_tile not in self.player_prev_move: self.draw_tile(screen, self.selected_tile)
             self.selected_tile = clicked_tile
-            self.highlight_tile(screen, clicked_tile)
+            self.draw_tile(screen, clicked_tile, highlight=True)
         elif self.selected_tile and self.turn == self.orientation and self.makeMove(self.selected_tile, clicked_tile): # select a move
-            self.unhighlight_tile(screen, self.selected_tile)
-            self.draw_tile(screen, clicked_tile)
+            # highlight player move
+            self.draw_tile(screen, self.selected_tile, highlight=True)
+            self.draw_tile(screen, clicked_tile, highlight=True)
+            # unhighlight opponent's last move
+            self.draw_tile(screen, self.opponent_prev_move[0])
+            self.draw_tile(screen, self.opponent_prev_move[1])
+            # turn-over, return player move
+            self.player_prev_move = (self.selected_tile, clicked_tile)
             self.turn = PieceColor.BLACK if self.turn == PieceColor.WHITE else PieceColor.WHITE
-            print(f"move made, turn is now {self.turn}")
             move = (self.selected_tile, clicked_tile)
             self.selected_tile = None
             return move
         return None
     
     def process_opponent_move(self, screen, move : ((int, int), (int, int))):
+        # process received opponent move
         from_coord, to_coord = move
         self.makeOpponentMove(from_coord, to_coord)
-        self.draw_tile(screen, from_coord)
-        self.draw_tile(screen, to_coord)
+        # highlight opponent move
+        self.draw_tile(screen, from_coord, highlight=True)
+        self.draw_tile(screen, to_coord, highlight=True)
+        # unhighlight player's previous move
+        self.draw_tile(screen, self.player_prev_move[0])
+        self.draw_tile(screen, self.player_prev_move[1])
+        # turn-over
+        self.opponent_prev_move = (from_coord, to_coord)
         self.turn = PieceColor.BLACK if self.turn == PieceColor.WHITE else PieceColor.WHITE
-        print(f"opponent made move turn is now {self.turn}")
-        
+
     def inCheck(self):
         x, y = self.king.x, self.king.y
         # determine if king is checked by adjacent king

@@ -1,20 +1,13 @@
-class DummyA:
-    pass
-class DummyB:
-    pass
-class DummyC:
-    pass
-class DummyD:
-    pass
+import pygame
 
-exA = DummyA()
-exB = DummyB()
-exC = DummyC()
-exD = DummyD()
-
-type_list = []
-type_list.append(type(exA))
-type_list.append(type(exB))
-type_list.append(type(exD))
-
-print(DummyC in type_list)
+pygame.init()
+clock = pygame.time.Clock()
+screen = pygame.display.set_mode((45 * 8, 45 * 8))
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    pygame.display.flip()
+    clock.tick(60)
+pygame.quit()
