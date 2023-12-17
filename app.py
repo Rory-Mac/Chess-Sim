@@ -1,8 +1,9 @@
 import re
+import time
 import pygame
 from constants import *
 from player import Player
-from game_board import GameBoard, PieceColor
+from game_board import GameBoard
 
 #--------------------------------------------------------------------------------------------------------------
 # Main Game Loop
@@ -42,34 +43,44 @@ class App:
     def start_game(self, game_orientation):
         pygame.init()
         clock = pygame.time.Clock()
-        board = GameBoard(game_orientation)
         screen = pygame.display.set_mode((45*8, 45*8))
+        board = GameBoard(screen, game_orientation)
         pygame.display.set_caption(self.player.player_tag)
-        board.draw(screen)
+        board.draw()
         running = True
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    move = board.process_click_event(screen, pygame.mouse.get_pos())
-                    if move:
-                        self.player.send_move(move)
+                    valid_move = board.process_click_event(pygame.mouse.get_pos())
+                    if valid_move:
+                        self.player.send_move(valid_move)
                 if self.player.opponent_next_move:
-                    board.process_opponent_move(screen, self.player.opponent_next_move)
+                    board.process_opponent_move(self.player.opponent_next_move)
+                    if board.in_check_mate():
+                        self.player.terminate_game()
+                        running = False
                     self.player.opponent_next_move = None
+                if self.player.end_game_trigger:
+                    running = False
             pygame.display.flip()
             clock.tick(60)
+        board.highlight_end_game()
+        time.sleep(10)
         pygame.quit()
 
 App()
+
 # TODO
-# GET IT WORKING
-#   visualise castling on opponent side
-#   implement checkmate algorithm
-#   stylish blue board + better images
-# REFACTOR
+# FINALISE
+#   checkmate
+#   debug checkmate + end game
+#   stylish blue board + better piece assets
+#       https://berryarray.itch.io/chess-pieces-16x16-one-bit
+#       https://wildlifestudios.itch.io/chess-set-pixel-art
+#       https://devilsworkshop.itch.io/pixel-art-chess-asset-pack
+#
 #   add server event logging + shell script for testing demo
-#   add function docstrings, return/argument types
 # DOCUMENT
 #   create github page for chess project, use https://github.com/eliben/luz-cpu as example template

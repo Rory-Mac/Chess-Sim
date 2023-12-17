@@ -8,29 +8,20 @@ class ChessPiece:
         self.x = x
         self.y = y
 
-    def getX(self):
-        return self.x
-    
-    def getY(self):
-        return self.y
-    
-    def getColor(self):
-        return self.color
-
-    def isMoveValid(self, board, to_coord : (int, int)) -> bool:
-        return self.isValid(board, to_coord) and self.isInRange(to_coord) and not self.isBlocked(board, to_coord)
+    def move_is_valid(self, board, to_coord : (int, int)) -> bool:
+        return self.is_valid(board, to_coord) and self.is_in_range(to_coord) and not self.is_blocked(board, to_coord)
 
     # default method, overriden by class Pawn
-    def isValid(self, board, to_coord : (int, int)) -> bool:
+    def is_valid(self, board, to_coord : (int, int)) -> bool:
         target_piece = board.get_piece(to_coord)
-        return not target_piece or (target_piece and target_piece.getColor() != board.orientation)
+        return not target_piece or (target_piece and target_piece.color != board.orientation)
 
     @abstractmethod
-    def isInRange(self, to_coord : (int, int)) -> bool:
+    def is_in_range(self, to_coord : (int, int)) -> bool:
         pass
 
     # default method, overriden by classes King, Knight, Pawn  
-    def isBlocked(self, board, coord : (int, int)) -> bool:
+    def is_blocked(self, board, coord : (int, int)) -> bool:
         target_x, target_y = coord
         # if moving vertically
         if self.x == target_x:
@@ -85,43 +76,43 @@ class ChessPiece:
         return False
 
 class King(ChessPiece):
-    def isInRange(self, coord : (int, int)) -> bool:
+    def is_in_range(self, coord : (int, int)) -> bool:
         dx = abs(self.x - coord[0])
         dy = abs(self.y - coord[1])
         return 0 <= dx <= 1 and 0 <= dy <= 1 and (dx != 0 or dy != 0)
 
-    def isBlocked(self, board, coord : (int, int)) -> bool:
+    def is_blocked(self, board, coord : (int, int)) -> bool:
         return False
 
 class Queen(ChessPiece):
-    def isInRange(self, coord : (int, int)) -> bool:
+    def is_in_range(self, coord : (int, int)) -> bool:
         dx = abs(self.x - coord[0])
         dy = abs(self.y - coord[1])
         return (dx == 0 and dy != 0) or (dy == 0 and dx != 0) or (dx == dy)
 
 class Knight(ChessPiece):
-    def isInRange(self, coord : (int, int)) -> bool:
+    def is_in_range(self, coord : (int, int)) -> bool:
         dx = abs(self.x - coord[0])
         dy = abs(self.y - coord[1])
         return (dx == 1 and dy == 2) or (dy == 1 and dx == 2)
     
-    def isBlocked(self, board, coord : (int, int)) -> bool:
+    def is_blocked(self, board, coord : (int, int)) -> bool:
         return False
 
 class Rook(ChessPiece):
-    def isInRange(self, coord : (int, int)) -> bool:
+    def is_in_range(self, coord : (int, int)) -> bool:
         dx = abs(self.x - coord[0])
         dy = abs(self.y - coord[1])
         return (dx == 0 and dy != 0) or (dy == 0 and dx != 0)
 
 class Bishop(ChessPiece):
-    def isInRange(self, coord : (int, int)) -> bool:
+    def is_in_range(self, coord : (int, int)) -> bool:
         dx = abs(self.x - coord[0])
         dy = abs(self.y - coord[1])
         return (dx == dy) and (dx != 0 or dy != 0)
 
 class Pawn(ChessPiece):
-    def isValid(self, board, coord : (int, int)) -> bool:
+    def is_valid(self, board, coord : (int, int)) -> bool:
         dx = coord[0] - self.x
         dy = self.y - coord[1]
         target_piece = board.get_piece(coord)
@@ -136,8 +127,8 @@ class Pawn(ChessPiece):
             return True
         return False
 
-    def isInRange(self, coord : (int, int)) -> bool:
+    def is_in_range(self, coord : (int, int)) -> bool:
         return True
 
-    def isBlocked(self, board, coord : (int, int)) -> bool:
+    def is_blocked(self, board, coord : (int, int)) -> bool:
         return False

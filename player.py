@@ -6,6 +6,7 @@ from threading import Thread
 class Player:
     def __init__(self):
         self.game_trigger = None
+        self.end_game_trigger = False
         self.player_tag = input("Enter username: ")
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         self.opponent_socket = socket(AF_INET, SOCK_STREAM)
@@ -71,6 +72,9 @@ class Player:
                 self.opponent_connection = connection
                 print("Request Accepted. Press Enter to start game.")
                 self.__opponent_handler()
+                # exit opponent context upon checkmate, re-enter server context 
+                self.opponent_connection.close()
+                self.end_game_trigger = False
             elif request_type == RequestType.INITIALISE_REQUESTING:
                 listening_addr, game_orientation = payload
                 self.opponent_socket.connect(listening_addr)
@@ -78,6 +82,9 @@ class Player:
                 self.game_trigger = game_orientation
                 print("Request Accepted. Press Enter to start game.")
                 self.__opponent_handler()
+                # exit opponent context upon checkmate, re-enter server context
+                self.opponent_connection.close()
+                self.end_game_trigger = False
             elif request_type == RequestType.LIST_ALL:
                 print(payload)
             elif request_type == RequestType.REJECT_GAME:
@@ -90,12 +97,17 @@ class Player:
 
     def __opponent_handler(self):
         while True:
+            if self.end_game_trigger:
+                return
             if self.opponent_connection:
                 message = self.opponent_connection.recv(PACKET_MAX_SIZE)
-                _, move = pickle.loads(message)
+                request_type, move = pickle.loads(message)
             else:
                 message = self.opponent_socket.recv(PACKET_MAX_SIZE)
-                _, move = pickle.loads(message)
+                request_type, move = pickle.loads(message)
+            if request_type == RequestType.CHECKMATE:
+                self.end_game_trigger = True
+                return
             self.opponent_next_move = self.__flip_move(move)
 
     def send_move(self, move):
@@ -103,3 +115,9 @@ class Player:
             self.opponent_connection.send(pickle.dumps((RequestType.MOVE, move)))
         else:
             self.opponent_socket.send(pickle.dumps((RequestType.MOVE, move)))
+
+    def terminate_game(self, move):
+        if self.opponent_connection:
+            self.opponent_connection.send(pickle.dumps((RequestType.CHECKMATE, move)))
+        else:
+            self.opponent_socket.send(pickle.dumps((RequestType.CHECKMATE, move)))
