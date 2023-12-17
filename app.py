@@ -74,7 +74,6 @@ App()
 
 # TODO
 # FINALISE
-#   checkmate
 #   debug checkmate + end game
 #   stylish blue board + better piece assets
 #       https://berryarray.itch.io/chess-pieces-16x16-one-bit

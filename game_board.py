@@ -298,9 +298,74 @@ class GameBoard:
                 attacking_pieces.append(piece)
         return attacking_pieces
     
-    # return list of pieces that can move to given tile
-    def get_pieces_in_range(tile : (int, int)):
-        pass
+    # return list of pieces of a given color that can move to given tile
+    def get_pieces_in_range(self, tile : (int, int)):
+        x, y = tile
+        pieces_in_range = []
+        # determine if tile can be reached by adjacent kings
+        if abs(x - self.king.x) < 2 and abs(y - self.king.y) < 2:
+            pieces_in_range.append(self.king)        
+        if abs(x - self.opponent_king.x) < 2 and abs(y - self.opponent_king.y) < 2:
+            pieces_in_range.append(self.opponent_king)
+        # determine if tile can be reached by adjacent knights
+        for position in [(x - 2, y - 1), (x - 2, y + 1), (x - 1, y + 2), (x - 1, y - 2), (x + 1, y + 2), (x + 1, y - 2)]:
+            piece = self.get_piece(position)
+            if piece and isinstance(piece, Knight):
+                pieces_in_range.append(piece)
+        # determine if tile can be reached by adjacent pawns
+        piece = self.get_piece((x, y - 1))
+        if isinstance(piece, Pawn) and piece.color != self.player_color:
+            pieces_in_range.append(piece)
+        piece = self.get_piece((x, y - 2))
+        if isinstance(piece, Pawn) and piece.move_count == 0 and piece.color != self.player_color:
+            pieces_in_range.append(piece)
+        piece = self.get_piece((x, y + 1))
+        if isinstance(piece, Pawn) and piece.color == self.player_color:
+            pieces_in_range.append(piece)
+        piece = self.get_piece((x, y + 2))
+        if isinstance(piece, Pawn) and piece.move_count == 0 and piece.color == self.player_color:
+            pieces_in_range.append(piece)
+        # determine if tile can be reached vertically or horizontally by rook or queen
+        left, right, up, down = [x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]
+        left_piece = right_piece = up_piece = down_piece = None
+        while left_piece == None and left[0] >= 0:
+            left_piece = self.get_piece(left)
+            left[0] -= 1
+        while right_piece == None and right[0] <= 7:
+            right_piece = self.get_piece(right)
+            right[0] += 1
+        while up_piece == None and up[1] >= 0:
+            up_piece = self.get_piece(up)
+            up[1] -= 1
+        while down_piece == None and down[1] <= 7:
+            down_piece = self.get_piece(down)
+            down[1] += 1
+        for piece in [left_piece, right_piece, up_piece, down_piece]:
+            if (isinstance(piece, Rook) or isinstance(piece, Queen)):
+                pieces_in_range.append(piece)
+        # determine if piece is endangered diagonally by bishop or queen
+        left_up, right_up, left_down, right_down = [x - 1, y - 1], [x + 1, y - 1], [x - 1, y + 1], [x + 1, y + 1]
+        left_up_piece = right_up_piece = left_down_piece = right_down_piece = None
+        while left_up_piece == None and left_up[0] >= 0 and left_up[1] >= 0:
+            left_up_piece = self.get_piece(left_up)
+            left_up[0] -= 1
+            left_up[1] -= 1
+        while right_up_piece == None and right_up[0] <= 7 and right_up[1] >= 0 :
+            right_up_piece = self.get_piece(right_up)
+            right_up[0] += 1
+            right_up[1] -= 1
+        while left_down_piece == None and left_down[0] >= 0 and left_down[1] <= 7:
+            left_down_piece = self.get_piece(left_down)
+            left_down[0] -= 1
+            left_down[1] += 1
+        while right_down_piece == None and right_down[0] <= 7 and right_down[1] <= 7:
+            right_down_piece = self.get_piece(right_down)
+            right_down[0] += 1
+            right_down[1] += 1
+        for piece in [left_up_piece, right_up_piece, left_down_piece, right_down_piece]:
+            if (isinstance(piece, Bishop) or isinstance(piece, Queen)):
+                pieces_in_range.append(piece)
+        return pieces_in_range
 
     def castle_is_valid(self, rook) -> bool:
         if not (self.king.move_count == 0 and rook.move_count == 0): 
@@ -351,10 +416,43 @@ class GameBoard:
         self.draw_tile((king.x, king.y), highlight=True)
 
     # return list of tiles that exist between two horizontally, vertically or diagonally separated tiles
-    def tiles_between(tile1 : (int, int), tile2 : (int, int)):
+    def tiles_between(from_tile : (int, int), to_tile : (int, int)):
         tiles = []
-        if 
-
+        from_x, from_y = from_tile
+        to_x, to_y = to_tile
+        if from_y == to_y: # find horizontal tiles
+            start_x = from_x if from_x < to_x else to_x
+            end_x = to_x if to_x > from_x else from_x
+            start_x += 1
+            while start_x < end_x:
+                tiles.append((start_x, to_y))
+                start_x += 1
+        elif from_x == to_x: # find vertical tiles
+            start_y = from_y if from_y < to_y else to_y
+            end_y = to_y if to_y > from_y else from_y
+            start_y += 1
+            while start_y < end_y:
+                tiles.append((to_x, start_y))
+                start_y += 1
+        elif (from_x < to_x and from_y < to_y) or (from_x > to_x and from_y > to_y): # find diagonal tiles (top-left/bottom-right)
+            start_x = from_x if from_x < to_x else to_x
+            start_y = from_y if from_y < to_y else to_y
+            end_x = to_x if to_x > from_x else from_x
+            end_y = to_y if to_y > from_y else from_y
+            while start_x < end_x and start_y < end_y:
+                tiles.append((start_x, start_y))
+                start_x += 1
+                start_y += 1
+        elif (from_x < to_x and from_y > to_y) or (from_x > to_x and from_y < to_y): # find diagonal tiles (top-right/bottom-left)
+            start_x = from_x if from_x < to_x else to_x
+            start_y = from_y if from_y > to_y else to_y
+            end_x = to_x if to_x > from_x else from_x
+            end_y = to_y if to_y < from_y else from_y
+            while start_x < end_x and start_y > end_y:
+                tiles.append((start_x, start_y))
+                start_x += 1
+                start_y -= 1
+        return tiles
 
     def in_check_mate(self) -> bool:
         x, y = self.king.x, self.king.y
@@ -376,8 +474,6 @@ class GameBoard:
         if isinstance(attacking_piece, Bishop) or isinstance(attacking_piece, Rook) or isinstance(attacking_piece, Queen):
             blocking_tiles = self.tiles_between((attacking_piece.x, attacking_piece.y), (self.king.x, self.king.y))
             for tile in blocking_tiles:
-                if self.get_pieces_in_range(tile):
+                if [piece for piece in self.get_pieces_in_range(tile) if piece.color == self.player_color]:
                     return False # there exists a move to block opponent's attacking piece
         return True
-
-# finish implementation of tiles_between() and get_pieces_in_range() function
