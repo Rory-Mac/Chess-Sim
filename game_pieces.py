@@ -14,7 +14,7 @@ class ChessPiece:
     # default method, overriden by class Pawn
     def is_valid(self, board, to_coord : (int, int)) -> bool:
         target_piece = board.get_piece(to_coord)
-        return not target_piece or (target_piece and target_piece.color != board.orientation)
+        return not target_piece or (target_piece and target_piece.color != board.player_color)
 
     @abstractmethod
     def is_in_range(self, to_coord : (int, int)) -> bool:

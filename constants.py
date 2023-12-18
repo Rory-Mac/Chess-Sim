@@ -1,22 +1,18 @@
 from enum import Enum
 
-DARK_TILE = (119,153,84)
-LIGHT_TILE = (233,237,204)
-HIGHLIGHTED_DARK_TILE = (187,204,68)
-HIGHLIGHTED_LIGHT_TILE = (244,246,128)
-DARK_CHECKMATE = (212,109,81)
-LIGHT_CHECKMATE = (235,125,105)
-#DARK_TILE = (13,31,67)
-#LIGHT_TILE = (0,71,135)
-#HIGHLIGHTED_DARK_TILE = (130,159,217)
-#HIGHLIGHTED_LIGHT_TILE = (190,212,232)
-
 PLAYER_DIRECTORY_ADDR = ('localhost', 18000)
 PACKET_MAX_SIZE = 1024
+TILE_WIDTH = 48
+
+DARK_TILE = (69,77,95)
+LIGHT_TILE = (230,234,215)
+CHECKMATE_TILE = (153,28,54)
+HIGHLIGHTED_DARK_TILE = (130,159,217)
+HIGHLIGHTED_LIGHT_TILE = (190,212,232)
 
 class PieceColor(Enum):
-    WHITE = 0
-    BLACK = 1
+    LIGHT = 0
+    DARK = 1
 
 class PlayerStatus(Enum):
     ONLINE = 0
@@ -24,14 +20,15 @@ class PlayerStatus(Enum):
 
 class RequestType(Enum):
     SET_NAME = 0                    # payload :: username
-    LIST_ALL = 1                    # payload :: none | player_list
+    LIST_ALL = 1                    # payload :: None | player_list
     GAME_REQUEST = 2                # payload :: (user_from, user_to)
     ACCEPT_GAME = 3                 # payload :: user_from, listening_addr
     REJECT_GAME = 4                 # payload :: (user_from, user_to)
     INITIALISE_REQUESTING = 5       # payload :: (listening_addr, color)
     INITIALISE_REQUESTED = 6        # payload :: color
     MOVE = 6                        # payload :: ((x1,y1), (x2,y2))
-    CHECKMATE = 7                   # payload :: ((x1,y1), (x2,y2))
-    LEAVE_SERVER = 8                # payload :: None
-    SUCCESS = 9                     # payload :: message
-    FAILURE = 10                     # payload :: message
+    TERMINATE_GAME = 7              # payload :: None
+    TERMINATE_GAME_ACK = 8          # payload :: None
+    LEAVE_SERVER = 9                # payload :: None
+    SUCCESS = 10                    # payload :: message
+    FAILURE = 11                    # payload :: message

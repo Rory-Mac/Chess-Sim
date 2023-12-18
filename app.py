@@ -19,6 +19,7 @@ class App:
             if self.player.game_trigger:
                 self.start_game(self.player.game_trigger)
                 self.player.game_trigger = None
+                self.player.end_game_trigger = False
             # process input command
             user_input = input("Input command: ")
             if user_input == "": continue
@@ -43,12 +44,17 @@ class App:
     def start_game(self, game_orientation):
         pygame.init()
         clock = pygame.time.Clock()
-        screen = pygame.display.set_mode((45*8, 45*8))
+        screen = pygame.display.set_mode((8*TILE_WIDTH, 8*TILE_WIDTH))
         board = GameBoard(screen, game_orientation)
         pygame.display.set_caption(self.player.player_tag)
         board.draw()
         running = True
         while running:
+            if self.player.end_game_trigger:
+                board.highlight_end_game()
+                pygame.display.flip()
+                time.sleep(5)
+                break
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -60,26 +66,16 @@ class App:
                     board.process_opponent_move(self.player.opponent_next_move)
                     if board.in_check_mate():
                         self.player.terminate_game()
-                        running = False
                     self.player.opponent_next_move = None
-                if self.player.end_game_trigger:
-                    running = False
             pygame.display.flip()
             clock.tick(60)
-        board.highlight_end_game()
-        time.sleep(10)
         pygame.quit()
 
 App()
 
 # TODO
 # FINALISE
-#   debug checkmate + end game
-#   stylish blue board + better piece assets
-#       https://berryarray.itch.io/chess-pieces-16x16-one-bit
-#       https://wildlifestudios.itch.io/chess-set-pixel-art
-#       https://devilsworkshop.itch.io/pixel-art-chess-asset-pack
-#
-#   add server event logging + shell script for testing demo
+#   debug end game (cannot create new game after game ends)
+#   add server event logging
 # DOCUMENT
 #   create github page for chess project, use https://github.com/eliben/luz-cpu as example template

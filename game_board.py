@@ -4,53 +4,52 @@ import winsound
 from game_pieces import *
 from constants import *
 
-
 class GameBoard:
     def __init__(self, screen, player_color):
         self.board = [[None for _ in range(8)] for _ in range(8)]
         self.screen = screen
         self.player_color = player_color
-        self.opponent_color = PieceColor.BLACK if self.player_color == PieceColor.WHITE else PieceColor.WHITE
+        self.opponent_color = PieceColor.DARK if self.player_color == PieceColor.LIGHT else PieceColor.LIGHT
         self.selected_tile = None
         self.player_prev_move = ((-1,-1),(-1,-1)) # dummy initialisation
         self.opponent_prev_move = ((-1,-1),(-1,-1)) # dummy initialisation
-        white_oriented_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
-        black_oriented_order = [Rook, Knight, Bishop, King, Queen, Bishop, Knight, Rook]
+        light_oriented_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+        dark_oriented_order = [Rook, Knight, Bishop, King, Queen, Bishop, Knight, Rook]
         self.king = None # later initialised for quicker retrieval
         self.opponent_king = None # later initialised for quicker retrieval
-        self.turn = PieceColor.WHITE
-        if self.player_color == PieceColor.WHITE:
-            for i, piece in enumerate(white_oriented_order):
-                self.__add_piece(piece(i, 0, PieceColor.BLACK))
-                self.__add_piece(Pawn(i, 1, PieceColor.BLACK))
-                self.__add_piece(Pawn(i, 6, PieceColor.WHITE))
-                self.__add_piece(piece(i, 7, PieceColor.WHITE))
+        self.turn = PieceColor.LIGHT
+        if self.player_color == PieceColor.LIGHT:
+            for i, piece in enumerate(light_oriented_order):
+                self.__add_piece(piece(i, 0, PieceColor.DARK))
+                self.__add_piece(Pawn(i, 1, PieceColor.DARK))
+                self.__add_piece(Pawn(i, 6, PieceColor.LIGHT))
+                self.__add_piece(piece(i, 7, PieceColor.LIGHT))
                 self.king = self.get_piece((4,7))
                 self.opponent_king = self.get_piece((4,0))
-        elif self.player_color == PieceColor.BLACK:
-            for i, piece in enumerate(black_oriented_order):            
-                self.__add_piece(piece(i, 0, PieceColor.WHITE))
-                self.__add_piece(Pawn(i, 1, PieceColor.WHITE))
-                self.__add_piece(Pawn(i, 6, PieceColor.BLACK))
-                self.__add_piece(piece(i, 7, PieceColor.BLACK))
+        elif self.player_color == PieceColor.DARK:
+            for i, piece in enumerate(dark_oriented_order):            
+                self.__add_piece(piece(i, 0, PieceColor.LIGHT))
+                self.__add_piece(Pawn(i, 1, PieceColor.LIGHT))
+                self.__add_piece(Pawn(i, 6, PieceColor.DARK))
+                self.__add_piece(piece(i, 7, PieceColor.DARK))
                 self.king = self.get_piece((3,7))
                 self.opponent_king = self.get_piece((3,0))
         self.game_assets = {
-            PieceColor.BLACK : {
-                King : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/king_black.svg'), (45, 45)),
-                Queen : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/queen_black.svg'), (45, 45)),
-                Rook : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/rook_black.svg'), (45, 45)),
-                Bishop : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/bishop_black.svg'), (45, 45)),
-                Knight : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/knight_black.svg'), (45, 45)),
-                Pawn : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/pawn_black.svg'), (45, 45))
+            PieceColor.DARK : {
+                King : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/king_dark.png'), (TILE_WIDTH, TILE_WIDTH)),
+                Queen : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/queen_dark.png'), (TILE_WIDTH, TILE_WIDTH)),
+                Rook : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/rook_dark.png'), (TILE_WIDTH, TILE_WIDTH)),
+                Bishop : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/bishop_dark.png'), (TILE_WIDTH, TILE_WIDTH)),
+                Knight : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/knight_dark.png'), (TILE_WIDTH, TILE_WIDTH)),
+                Pawn : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/pawn_dark.png'), (TILE_WIDTH, TILE_WIDTH))
             },
-            PieceColor.WHITE : {
-                King : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/king_white.svg'), (45, 45)),
-                Queen : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/queen_white.svg'), (45, 45)),
-                Rook : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/rook_white.svg'), (45, 45)),
-                Bishop : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/bishop_white.svg'), (45, 45)),
-                Knight : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/knight_white.svg'), (45, 45)),
-                Pawn : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/pawn_white.svg'), (45, 45))
+            PieceColor.LIGHT : {
+                King : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/king_light.png'), (TILE_WIDTH, TILE_WIDTH)),
+                Queen : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/queen_light.png'), (TILE_WIDTH, TILE_WIDTH)),
+                Rook : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/rook_light.png'), (TILE_WIDTH, TILE_WIDTH)),
+                Bishop : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/bishop_light.png'), (TILE_WIDTH, TILE_WIDTH)),
+                Knight : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/knight_light.png'), (TILE_WIDTH, TILE_WIDTH)),
+                Pawn : pygame.transform.scale(pygame.image.load(os.getcwd() + '/assets/pawn_light.png'), (TILE_WIDTH, TILE_WIDTH))
             }
         }
 
@@ -65,39 +64,44 @@ class GameBoard:
         # draw overlayed board
         for x in range(8):
             for y in range(8):
-                pygame.draw.rect(self.screen, self.get_tile_color((x,y)), pygame.Rect(45*x, 45*y, 45, 45))
+                pygame.draw.rect(self.screen, self.get_tile_color((x,y)), pygame.Rect(TILE_WIDTH*x, TILE_WIDTH*y, TILE_WIDTH, TILE_WIDTH))
         # draw pieces to screen
-        white_oriented_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
-        black_oriented_order = [Rook, Knight, Bishop, King, Queen, Bishop, Knight, Rook]
-        if self.player_color == PieceColor.WHITE:
-            for i, piece in enumerate(white_oriented_order):
-                self.screen.blit(self.game_assets[PieceColor.BLACK][piece], (i*45, 0))
-                self.screen.blit(self.game_assets[PieceColor.BLACK][Pawn], (i*45, 45))
-                self.screen.blit(self.game_assets[PieceColor.WHITE][Pawn], (i*45, 6*45))
-                self.screen.blit(self.game_assets[PieceColor.WHITE][piece], (i*45, 7*45))
-        elif self.player_color == PieceColor.BLACK:
-            for i, piece in enumerate(black_oriented_order):
-                self.screen.blit(self.game_assets[PieceColor.WHITE][piece], (i*45, 0))
-                self.screen.blit(self.game_assets[PieceColor.WHITE][Pawn], (i*45, 45))
-                self.screen.blit(self.game_assets[PieceColor.BLACK][Pawn], (i*45, 6*45))
-                self.screen.blit(self.game_assets[PieceColor.BLACK][piece], (i*45, 7*45))
+        light_oriented_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+        dark_oriented_order = [Rook, Knight, Bishop, King, Queen, Bishop, Knight, Rook]
+        if self.player_color == PieceColor.LIGHT:
+            for i, piece in enumerate(light_oriented_order):
+                self.screen.blit(self.game_assets[PieceColor.DARK][piece], (i*TILE_WIDTH, 0))
+                self.screen.blit(self.game_assets[PieceColor.DARK][Pawn], (i*TILE_WIDTH, TILE_WIDTH))
+                self.screen.blit(self.game_assets[PieceColor.LIGHT][Pawn], (i*TILE_WIDTH, 6*TILE_WIDTH))
+                self.screen.blit(self.game_assets[PieceColor.LIGHT][piece], (i*TILE_WIDTH, 7*TILE_WIDTH))
+        elif self.player_color == PieceColor.DARK:
+            for i, piece in enumerate(dark_oriented_order):
+                self.screen.blit(self.game_assets[PieceColor.LIGHT][piece], (i*TILE_WIDTH, 0))
+                self.screen.blit(self.game_assets[PieceColor.LIGHT][Pawn], (i*TILE_WIDTH, TILE_WIDTH))
+                self.screen.blit(self.game_assets[PieceColor.DARK][Pawn], (i*TILE_WIDTH, 6*TILE_WIDTH))
+                self.screen.blit(self.game_assets[PieceColor.DARK][piece], (i*TILE_WIDTH, 7*TILE_WIDTH))
 
     def draw_tile(self, tile : (int, int), highlight=False):
         x, y = tile
         tile_color = self.get_tile_color(tile)
         if highlight:
             tile_color = HIGHLIGHTED_DARK_TILE if tile_color == DARK_TILE else HIGHLIGHTED_LIGHT_TILE
-        pygame.draw.rect(self.screen, tile_color, pygame.Rect(45*x, 45*y, 45, 45))
+        pygame.draw.rect(self.screen, tile_color, pygame.Rect(TILE_WIDTH*x, TILE_WIDTH*y, TILE_WIDTH, TILE_WIDTH))
         piece = self.get_piece(tile)
         if piece:
             sprite = self.game_assets[piece.color][piece.__class__]
-            self.screen.blit(sprite, (45*x,45*y))
+            self.screen.blit(sprite, (TILE_WIDTH*x,TILE_WIDTH*y))
 
     def __add_piece(self, piece : ChessPiece):
         x, y = piece.x, piece.y
         if self.board[y][x] != None:
             raise LookupError("Piece already exists at provided tile.")
         self.board[y][x] = piece
+
+    def on_board(self, tile) -> bool:
+        if 0 <= tile[0] <= 7 and 0 <= tile[1] <= 7:
+            return True
+        return False
 
     def get_piece(self, tile) -> ChessPiece:
         if 0 <= tile[0] <= 7 and 0 <= tile[1] <= 7:
@@ -135,13 +139,13 @@ class GameBoard:
     def end_player_move(self, move):
         self.player_prev_move = move
         self.opponent_prev_move = ((-1,-1),(-1,-1))
-        self.turn = PieceColor.BLACK if self.turn == PieceColor.WHITE else PieceColor.WHITE
+        self.turn = PieceColor.DARK if self.turn == PieceColor.LIGHT else PieceColor.LIGHT
         self.selected_tile = None
 
     def end_opponent_move(self, move):        
         self.player_prev_move = ((-1,-1),(-1,-1))
         self.opponent_prev_move = move
-        self.turn = PieceColor.BLACK if self.turn == PieceColor.WHITE else PieceColor.WHITE
+        self.turn = PieceColor.DARK if self.turn == PieceColor.LIGHT else PieceColor.LIGHT
 
     def highlight_player_move(self, move):
         # unhighlight opponent's last move
@@ -161,16 +165,14 @@ class GameBoard:
 
     def highlight_end_game(self):
         checkmated_tile = (self.king.x, self.king.y) if self.in_check_mate() else (self.opponent_king.x, self.opponent_king.y)
-        tile_color = self.get_tile_color(checkmated_tile)
-        checkmate_color = DARK_CHECKMATE if tile_color == DARK_TILE else LIGHT_CHECKMATE 
-        pygame.draw.rect(self.screen, checkmate_color, pygame.Rect(45*checkmated_tile[0], 45*checkmated_tile[1], 45, 45))
+        pygame.draw.rect(self.screen, CHECKMATE_TILE, pygame.Rect(TILE_WIDTH*checkmated_tile[0], TILE_WIDTH*checkmated_tile[1], TILE_WIDTH, TILE_WIDTH))
         king = self.get_piece(checkmated_tile)
         sprite = self.game_assets[king.color][King]
-        self.screen.blit(sprite, (45*king.x,45*king.y))
+        self.screen.blit(sprite, (TILE_WIDTH*king.x, TILE_WIDTH*king.y))
 
     # if click event triggers a move on player's turn, return that move, else return none
     def process_click_event(self, click_coord : (int, int)):
-        clicked_tile = (click_coord[0] // 45, click_coord[1] // 45)
+        clicked_tile = (click_coord[0] // TILE_WIDTH, click_coord[1] // TILE_WIDTH)
         clicked_piece = self.get_piece(clicked_tile)
         if self.selected_tile == clicked_tile and self.selected_tile not in self.player_prev_move: # unselect player piece
             self.draw_tile(self.selected_tile)
@@ -461,15 +463,23 @@ class GameBoard:
             return False
         # if king can move to any adjacent tile, king is not in checkmate  
         for tile in [(x - 1, y - 1), (x, y - 1), (x + 1, y - 1), (x - 1, y), (x + 1, y), (x - 1, y + 1), (x, y + 1), (x + 1, y + 1)]:
-            if self.king.move_is_valid(self, tile):
+            if not self.on_board(tile): continue
+            captured_piece = self.get_piece(tile)
+            if self.make_move_if_valid(((self.king.x, self.king.y), tile)):
+                self.cancel_move(((self.king.x, self.king.y), tile), self.king, captured_piece)
                 return False
-        # if there are more than one pieces attacking king and king cannot move to adjacent tile, checkmate
+        # if there is more than one piece attacking king and king cannot move to adjacent tile, checkmate
         if len(attacking_pieces) > 1:
             return True
-        # if king is only attacked by one piece, check if attacking piece can captured or blocked
+        # if king is only attacked by one piece, check if attacking piece can be captured or blocked
         attacking_piece = attacking_pieces[0]
         can_capture = self.in_danger((attacking_piece.x, attacking_piece.y), self.player_color)
-        if can_capture: 
+        if can_capture:
+            if can_capture == [self.king]: # edge case where king is only piece that can capture, but attacking piece is protected
+                if self.make_move_if_valid(((self.king.x, self.king.y), (attacking_piece.x, attacking_piece.y))):
+                    self.cancel_move(((self.king.x, self.king.y), tile), self.king, captured_piece)
+                    return False
+                return True
             return False # there exists a move to capture opponent's attacking piece
         if isinstance(attacking_piece, Bishop) or isinstance(attacking_piece, Rook) or isinstance(attacking_piece, Queen):
             blocking_tiles = self.tiles_between((attacking_piece.x, attacking_piece.y), (self.king.x, self.king.y))

@@ -72,9 +72,8 @@ class Player:
                 self.opponent_connection = connection
                 print("Request Accepted. Press Enter to start game.")
                 self.__opponent_handler()
-                # exit opponent context upon checkmate, re-enter server context 
-                self.opponent_connection.close()
-                self.end_game_trigger = False
+                self.end_game_trigger = True
+                self.opponent_socket = socket(AF_INET, SOCK_STREAM) # reset opponent socket when opponent handling terminates
             elif request_type == RequestType.INITIALISE_REQUESTING:
                 listening_addr, game_orientation = payload
                 self.opponent_socket.connect(listening_addr)
@@ -82,9 +81,8 @@ class Player:
                 self.game_trigger = game_orientation
                 print("Request Accepted. Press Enter to start game.")
                 self.__opponent_handler()
-                # exit opponent context upon checkmate, re-enter server context
-                self.opponent_connection.close()
-                self.end_game_trigger = False
+                self.end_game_trigger = True
+                self.opponent_socket = socket(AF_INET, SOCK_STREAM) # reset opponent socket when opponent handling terminates
             elif request_type == RequestType.LIST_ALL:
                 print(payload)
             elif request_type == RequestType.REJECT_GAME:
@@ -97,18 +95,25 @@ class Player:
 
     def __opponent_handler(self):
         while True:
-            if self.end_game_trigger:
-                return
             if self.opponent_connection:
                 message = self.opponent_connection.recv(PACKET_MAX_SIZE)
                 request_type, move = pickle.loads(message)
             else:
                 message = self.opponent_socket.recv(PACKET_MAX_SIZE)
                 request_type, move = pickle.loads(message)
-            if request_type == RequestType.CHECKMATE:
-                self.end_game_trigger = True
+            if request_type == RequestType.TERMINATE_GAME:
+                self.ack_termination()
+                self.__close_opponent_connection()
+                return
+            elif request_type == RequestType.TERMINATE_GAME_ACK:
+                self.__close_opponent_connection()
                 return
             self.opponent_next_move = self.__flip_move(move)
+
+    def __close_opponent_connection(self):
+        if self.opponent_connection:
+            self.opponent_connection.close()
+        self.opponent_socket.close()
 
     def send_move(self, move):
         if self.opponent_connection:
@@ -116,8 +121,14 @@ class Player:
         else:
             self.opponent_socket.send(pickle.dumps((RequestType.MOVE, move)))
 
-    def terminate_game(self, move):
+    def terminate_game(self):
         if self.opponent_connection:
-            self.opponent_connection.send(pickle.dumps((RequestType.CHECKMATE, move)))
+            self.opponent_connection.send(pickle.dumps((RequestType.TERMINATE_GAME, None)))
         else:
-            self.opponent_socket.send(pickle.dumps((RequestType.CHECKMATE, move)))
+            self.opponent_socket.send(pickle.dumps((RequestType.TERMINATE_GAME, None)))
+
+    def ack_termination(self):
+        if self.opponent_connection:
+            self.opponent_connection.send(pickle.dumps((RequestType.TERMINATE_GAME_ACK, None)))
+        else:
+            self.opponent_socket.send(pickle.dumps((RequestType.TERMINATE_GAME_ACK, None)))

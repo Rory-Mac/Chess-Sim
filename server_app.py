@@ -66,8 +66,8 @@ class ServerApp:
             elif request_type == RequestType.ACCEPT_GAME:
                 print("Processing accept game")
                 user_from, listening_addr = payload
-                color_user_from = random.choice([PieceColor.WHITE, PieceColor.BLACK])
-                color_user_to = PieceColor.BLACK if color_user_from == PieceColor.WHITE else PieceColor.WHITE
+                color_user_from = random.choice([PieceColor.LIGHT, PieceColor.DARK])
+                color_user_to = PieceColor.DARK if color_user_from == PieceColor.LIGHT else PieceColor.LIGHT
                 requesting_connection = self.players[user_from]["active_connection"]
                 requesting_connection.send(pickle.dumps((RequestType.INITIALISE_REQUESTING, (listening_addr, color_user_from))))
                 client_connection.send(pickle.dumps((RequestType.INITIALISE_REQUESTED, color_user_to)))
