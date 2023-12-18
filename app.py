@@ -72,10 +72,3 @@ class App:
         pygame.quit()
 
 App()
-
-# TODO
-# FINALISE
-#   debug end game (cannot create new game after game ends)
-#   add server event logging
-# DOCUMENT
-#   create github page for chess project, use https://github.com/eliben/luz-cpu as example template
