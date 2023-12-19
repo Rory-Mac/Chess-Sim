@@ -30,6 +30,7 @@ class ServerApp:
                 conn, addr = self.socket.accept()
                 self.active_connections[addr] = ""
                 self.client_connections.append(conn)
+                self.__log_server_event(RequestType.JOIN_SERVER, addr)
                 # assign handling of client connection to thread pool
                 executor.submit(self.__client_handler, conn)
 

@@ -1,6 +1,5 @@
 import os
 import pygame
-import winsound
 from game_pieces import *
 from constants import *
 
@@ -185,7 +184,6 @@ class GameBoard:
                     self.castle(clicked_piece)
                     self.draw_tile(self.opponent_prev_move[0])
                     self.draw_tile(self.opponent_prev_move[1])
-                    winsound.PlaySound(os.getcwd() + '\\assets\player_move.wav', winsound.SND_FILENAME)
                     # player move recorded as king and rook's final rather than initial position
                     move = (self.selected_tile, clicked_tile)
                     self.end_player_move(((selected_piece.x, selected_piece.y), (clicked_piece.x, clicked_piece.y)))
@@ -200,8 +198,6 @@ class GameBoard:
             selected_piece = self.board[clicked_tile[1]][clicked_tile[0]]
             if isinstance(selected_piece, Pawn) and selected_piece.y == 0:
                 self.board[selected_piece.y][selected_piece.x] = Queen(selected_piece.x, selected_piece.y, self.player_color)
-            # play sound to user
-            winsound.PlaySound(os.getcwd() + '\\assets\player_move.wav', winsound.SND_FILENAME)
             # turn-over, highlight and return player move
             move = (self.selected_tile, clicked_tile)
             self.highlight_player_move(move)
@@ -216,7 +212,6 @@ class GameBoard:
             self.castle(rook)
             self.draw_tile(self.player_prev_move[0])
             self.draw_tile(self.player_prev_move[1])
-            winsound.PlaySound(os.getcwd() + '\\assets\opponent_move.wav', winsound.SND_FILENAME)
             # player move recorded as king and rook's final rather than initial position
             self.end_opponent_move(((self.opponent_king.x, self.opponent_king.y),(rook.x, rook.y)))
             return
@@ -226,8 +221,6 @@ class GameBoard:
         selected_piece = self.get_piece(move[1])
         if isinstance(selected_piece, Pawn) and selected_piece.y == 7: 
             self.board[selected_piece.y][selected_piece.x] = Queen(selected_piece.x, selected_piece.y, self.turn)
-        # play sound to user
-        winsound.PlaySound(os.getcwd() + '\\assets\opponent_move.wav', winsound.SND_FILENAME)
         # turn-over, highlight and end opponent move
         self.highlight_opponent_move(move)
         self.end_opponent_move(move)
